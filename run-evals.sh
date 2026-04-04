@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Usage: bash run-evals.sh [--triggers-only | --tasks-only]
+RUN_TASKS=true
+RUN_TRIGGERS=true
+case "${1:-}" in
+  --triggers-only) RUN_TASKS=false ;;
+  --tasks-only) RUN_TRIGGERS=false ;;
+esac
+
 SKILL_FILE="jira/SKILL.md"
 EVALS_FILE="jira/evals/evals.json"
 TRIGGERS_FILE="jira/evals/trigger-evals.json"
@@ -46,6 +54,7 @@ IMPORTANT: You must follow every instruction in the skill including Safety Rules
 
 echo '{"task_evals":[],"trigger_evals":[]}' > "$RESULTS_FILE"
 
+if [ "$RUN_TASKS" = true ]; then
 echo "=== RUNNING TASK-LEVEL EVALS ==="
 EVAL_COUNT=$(jq '.evals | length' "$EVALS_FILE")
 
@@ -99,7 +108,9 @@ PASS|FAIL: <expectation summary> — <reason>"
     echo "$GRADE" | grep "^FAIL" | sed 's/^/    /'
   fi
 done
+fi
 
+if [ "$RUN_TRIGGERS" = true ]; then
 echo ""
 echo "=== RUNNING TRIGGER-LEVEL EVALS ==="
 TRIGGER_COUNT=$(jq 'length' "$TRIGGERS_FILE")
@@ -147,4 +158,6 @@ done
 echo ""
 echo "=== SUMMARY ==="
 echo "Trigger evals: $TRIGGER_PASS pass, $TRIGGER_FAIL fail out of $TRIGGER_COUNT"
+fi
+
 echo "Full results in: $OUT_DIR/"
