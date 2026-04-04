@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, then `.jira-skill.json` (searching up to repo root), then `~/.config/jira-skill/config.json`, then ask the user. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), Confluence, auth setup, REST API scripting, or non-Jira trackers.
+description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, then `.jira-skill.json` (searching up to repo root), then `~/.config/jira-skill/config.json`, then ask the user. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), git branch naming, Confluence, auth setup, REST API scripting, or non-Jira trackers.
 compatibility: Requires `acli` and `mdadf` CLI. Uses `zsh` or `bash` process substitution for piping ADF into acli flags. On Windows PowerShell, uses temp files instead.
 ---
 
