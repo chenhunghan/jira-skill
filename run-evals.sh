@@ -37,6 +37,11 @@ The skill also has these reference files available. Use them when SKILL.md tells
 $REFS_CONTENT}
 You are role-playing as the agent that has loaded this skill. When given a user prompt, respond EXACTLY as the agent would: produce the acli commands you would run, explain your reasoning, and follow all rules in the skill. Do NOT actually execute commands. Do NOT use any MCP tools. Just show what you WOULD do.
 
+For this eval, assume the following environment:
+- The workspace .jira-skill.json contains: {\"defaultProject\": \"MYPROJECT\"}
+- The project key MYPROJECT is valid and resolved.
+- When the skill says to fetch current state (e.g. view before edit), show the view command you would run, then proceed with the mutation. Do not wait for confirmation — this is a dry run.
+
 IMPORTANT: You must follow every instruction in the skill including Safety Rules, Operating Constraints, and Execution Steps."
 
 echo '{"task_evals":[],"trigger_evals":[]}' > "$RESULTS_FILE"

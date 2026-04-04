@@ -173,7 +173,7 @@ Bug drafting rules:
 
 - Use bold section labels such as `**Short Description**`, not Markdown headings such as `## Short Description`.
 - Derive reproduction steps from the user-provided context and any directly observed behavior.
-- If the reproduction steps or expected behavior are too unclear to draft responsibly, ask the user for the missing details before creating the bug.
+- Draft the bug with whatever context is available. Use "[unknown]" for missing fields rather than blocking on clarification. Only ask the user if the problem itself is ambiguous (e.g. you cannot tell what is broken).
 - Truncate copied error text to 2000 characters.
 - Do not set Priority, Technical Impact, or Business Urgency. Leave those for triage.
 

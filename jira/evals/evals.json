@@ -18,7 +18,7 @@
       "expected_output": "Creates a bug in the configured default project, self-assigns it, and uses `mdadf --compact` with `--description-file` for the rich description.",
       "files": [],
       "expectations": [
-        "Uses `acli jira workitem create` with `--type \"Bug\"`, resolved from the local config file.",
+        "Uses `acli jira workitem create` with `--type \"Bug\"` and `--project \"MYPROJECT\"` (or the resolved default).",
         "Uses `--assignee \"@me\"` or an equivalent self-assignment flag.",
         "Uses `mdadf --compact` with `--description-file` rather than raw Markdown or inline JSON."
       ]
@@ -63,7 +63,7 @@
       "files": [],
       "expectations": [
         "Uses `acli jira workitem search --jql` with appropriate JQL filters.",
-        "Reads the default project from config.json.",
+        "Includes `project = MYPROJECT` (or the resolved default) in the JQL query.",
         "Does not attempt a key-based command."
       ]
     },
@@ -107,9 +107,9 @@
       "expected_output": "Shows the current description before replacing it, per safety rule 3.",
       "files": [],
       "expectations": [
-        "Fetches and displays the current description of MYPROJECT-200 before editing.",
+        "Shows an `acli jira workitem view MYPROJECT-200` command (or equivalent) BEFORE the edit command.",
         "Uses `acli jira workitem edit --key \"MYPROJECT-200\"` with `--description-file` and `mdadf --compact`.",
-        "Does not replace the description without showing the original first."
+        "The view command appears before the edit command in the response, not after."
       ]
     },
     {
