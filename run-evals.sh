@@ -41,6 +41,9 @@ case "$CLI" in
     MODEL_GRADE="${MODEL_GRADE:-haiku}"
     ;;
   codex|*/codex)
+    # Default: use codex's default model (omit -m flag).
+    # With an OpenAI API key, override for cheaper/faster runs:
+    #   MODEL_GENERATE=gpt-4.1-mini MODEL_GRADE=gpt-4.1-nano bash run-evals.sh
     MODEL_GENERATE="${MODEL_GENERATE:-}"
     MODEL_GRADE="${MODEL_GRADE:-}"
     ;;
