@@ -36,28 +36,13 @@ Notes:
 
 ## Configuration
 
-The skill looks for `defaultProject` in this order:
+No setup needed. The skill will ask for your Jira project key on first use and save it automatically.
 
-| Location | Scope | Survives update? |
-|----------|-------|-----------------|
-| `.jira-skill.json` in working directory | Per-repo | Yes |
-| `~/.config/jira-skill/config.json` | User-global | Yes |
-| `config.json` in skill directory | Placeholder | No (overwritten) |
+To set it ahead of time, create `.jira-skill.json` in your repo:
 
-**Per-repo** (recommended for multi-project users):
-
-```bash
-echo '{"defaultProject": "YOUR_PROJECT_KEY"}' > .jira-skill.json
+```json
+{ "defaultProject": "YOUR_PROJECT_KEY" }
 ```
-
-**User-global** (single project or fallback):
-
-```bash
-mkdir -p ~/.config/jira-skill
-echo '{"defaultProject": "YOUR_PROJECT_KEY"}' > ~/.config/jira-skill/config.json
-```
-
-The skill will ask on first use if no config is found, and save to `.jira-skill.json` (in a project) or `~/.config/jira-skill/config.json` (global context).
 
 ## What Makes This Skill Stand Out
 
