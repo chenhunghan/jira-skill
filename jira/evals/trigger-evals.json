@@ -1,0 +1,83 @@
+[
+  {
+    "query": "can you look up MYPROJECT-1455 and show me just the summary plus the latest comments?"
+  ,
+    "should_trigger": true
+  },
+  {
+    "query": "create a bug called \"Fix broken validation response\" in our default Jira project and make the description nice with a heading and bullets because plain text in Jira looks awful",
+    "should_trigger": true
+  },
+  {
+    "query": "move MYPROJECT-733 to In Review and assign it to me",
+    "should_trigger": true
+  },
+  {
+    "query": "add a comment to MYPROJECT-801 saying we reproduced this in dev, use bullet points",
+    "should_trigger": true
+  },
+  {
+    "query": "i need a jql query for all my open MYPROJECT bugs in the current sprint",
+    "should_trigger": true
+  },
+  {
+    "query": "update comment 10001 on MYPROJECT-801 so it says the fix is ready for QA, and keep the formatting clean",
+    "should_trigger": true
+  },
+  {
+    "query": "search jira for tickets i touched in the last week that are still in progress",
+    "should_trigger": true
+  },
+  {
+    "query": "please create a story in MYPROJECT for improving the onboarding flow and self-assign it",
+    "should_trigger": true
+  },
+  {
+    "query": "what does MYPROJECT-1773 say exactly, and who is assigned to it?",
+    "should_trigger": true
+  },
+  {
+    "query": "i have some markdown notes for a jira ticket description, convert them to whatever format acli needs and then show me the command",
+    "should_trigger": true
+  },
+  {
+    "query": "update the github PR description so it links to MYPROJECT-801",
+    "should_trigger": false
+  },
+  {
+    "query": "search this repo for references to jira-client and explain how release automation works",
+    "should_trigger": false
+  },
+  {
+    "query": "write me a README section explaining how to format markdown headings and bullet lists",
+    "should_trigger": false
+  },
+  {
+    "query": "open Confluence and make a page for the release checklist",
+    "should_trigger": false
+  },
+  {
+    "query": "can you find all TODO comments in the codebase and group them by package",
+    "should_trigger": false
+  },
+  {
+    "query": "show me how to authenticate acli with Atlassian on this laptop",
+    "should_trigger": false
+  },
+  {
+    "query": "turn this markdown into ADF JSON for me, but it is for a Confluence macro rather than a Jira ticket",
+    "should_trigger": false
+  },
+  {
+    "query": "what branch should i use for MYPROJECT-801 if i want a conventional commit too",
+    "should_trigger": false
+  },
+  {
+    "query": "make a shell script that takes a ticket key and prints a curl command for the Jira REST API",
+    "should_trigger": false
+  },
+  {
+    "query": "use Linear instead of Jira and create an issue for the same bug",
+    "should_trigger": false
+  }
+]

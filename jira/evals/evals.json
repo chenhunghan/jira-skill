@@ -1,0 +1,94 @@
+{
+  "skill_name": "jira",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me MYPROJECT-1455 with just the summary and comments.",
+      "expected_output": "Uses a direct view command for the specific key with a focused fields list and stays read-only.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem view MYPROJECT-1455` rather than a JQL search.",
+        "Uses a focused fields selection such as `summary,comment` instead of default broad output.",
+        "Does not propose or run a mutating Jira command."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a bug titled \"Fix broken validation response\" assigned to me. The description should have a heading and a bullet list explaining why this matters.",
+      "expected_output": "Creates a bug in the configured default project, self-assigns it, and uses `mdadf --compact` with `--description-file` for the rich description.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem create` with `--type \"Bug\"`, resolved from the local config file.",
+        "Uses `--assignee \"@me\"` or an equivalent self-assignment flag.",
+        "Uses `mdadf --compact` with `--description-file` rather than raw Markdown or inline JSON."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Add a comment to MYPROJECT-801 saying the issue is reproduced in dev and logs are attached, formatted as a bulleted update.",
+      "expected_output": "Creates a comment on the specific key and uses `mdadf --compact` with `--body-file`.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem comment create --key \"MYPROJECT-801\"`.",
+        "Uses `mdadf --compact` with `--body-file`.",
+        "Does not use JQL for a single known work item key."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Update comment 10001 on MYPROJECT-801 to say the fix is ready for QA, using a heading and a short paragraph.",
+      "expected_output": "Updates the specific comment ID on the specific work item and uses `mdadf --compact` with `--body-adf`.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem comment update --key \"MYPROJECT-801\" --id \"10001\"`.",
+        "Uses `mdadf --compact` with `--body-adf`.",
+        "Does not replace the ADF flow with plain text when the prompt asks for rich formatting."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Move MYPROJECT-733 to In Review and assign it to me.",
+      "expected_output": "Uses key-based transition and assignment commands for the same work item without falling back to JQL.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem transition --key \"MYPROJECT-733\" --status \"In Review\"` or an equivalent key-based transition.",
+        "Uses `acli jira workitem assign --key \"MYPROJECT-733\" --assignee \"@me\"` or an equivalent self-assignment command.",
+        "Does not use JQL for a single known work item key."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Find all bugs assigned to me in the current sprint that are still In Progress.",
+      "expected_output": "Uses JQL search with project from config, assignee = currentUser(), sprint in openSprints(), type = Bug, status = In Progress.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem search --jql` with appropriate JQL filters.",
+        "Reads the default project from config.json.",
+        "Does not attempt a key-based command."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "File a bug: our login page returns a 500 when you submit an empty email field. I'm on Chrome 120, macOS Sonoma. Assign it to me.",
+      "expected_output": "Creates a bug with bold section labels, not headings. Derives reproduction steps from the user's description.",
+      "files": [],
+      "expectations": [
+        "Uses `**Short Description**` bold labels, not `## Short Description` headings.",
+        "Includes steps to reproduce derived from the user's description.",
+        "Uses `--assignee \"@me\"`.",
+        "Uses `mdadf --compact` with `--description-file`."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I'm on Windows PowerShell. Create a task in MYPROJECT called 'Update API docs' with a bulleted description listing three endpoints to document.",
+      "expected_output": "Recognizes Windows environment and avoids bash process substitution. Uses a temp file pattern.",
+      "files": [],
+      "expectations": [
+        "Does not use `<(...)` process substitution.",
+        "Uses `mdadf --compact` to convert markdown.",
+        "Writes ADF to a temp file and passes it via `--description-file`."
+      ]
+    }
+  ]
+}
