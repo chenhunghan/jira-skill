@@ -141,7 +141,7 @@
       "files": [],
       "expectations": [
         "Asks the user which project key to use before creating the task.",
-        "Writes the project key to `.jira-skill.json` (workspace) or `~/.config/jira-skill/config.json` (global), not the in-repo config.json."
+        "Writes the project key to `.jira-skill.json` (workspace) or `~/.config/jira-skill/config.json` (global)."
       ]
     },
     {

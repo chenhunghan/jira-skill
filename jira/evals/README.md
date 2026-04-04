@@ -7,7 +7,7 @@ Two eval layers:
 
 ## Setup
 
-Create `.jira-skill.json` in the working directory or `~/.config/jira-skill/config.json` with your actual Jira project key (see the root README for details). The in-repo `config.json` is a placeholder and should not be edited.
+Create `.jira-skill.json` in your repo root or `~/.config/jira-skill/config.json` with your actual Jira project key (see the root README for details).
 
 ## Workspace
 
