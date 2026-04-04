@@ -15,9 +15,9 @@ jq -r '"Task evals: \(.evals | length)"' jira/evals/evals.json
 jq -r '"Trigger evals: \(length)"' jira/evals/trigger-evals.json
 ```
 
-### Behavioral eval (requires `claude` CLI)
+### Behavioral eval (requires `claude` or `codex` CLI)
 
-`run-evals.sh` sends each eval prompt + the full SKILL.md + all `references/*.md` files to an LLM and grades the response against expectations. It uses `claude -p` (non-interactive print mode) and writes results to `jira-workspace/eval-run-1/`.
+`run-evals.sh` sends each eval prompt + the full SKILL.md + all `references/*.md` files to an LLM and grades the response against expectations. Writes results to `jira-workspace/eval-run-1/`.
 
 ```bash
 bash run-evals.sh                       # run all (auto-detects claude or codex)
@@ -26,10 +26,17 @@ bash run-evals.sh --tasks-only          # task evals only
 bash run-evals.sh --task 7              # single task eval by id
 bash run-evals.sh --trigger 25          # single trigger eval by index (0-based)
 CLI=codex bash run-evals.sh             # force codex backend
-MODEL_GENERATE=haiku bash run-evals.sh  # override model
 ```
 
-The script auto-detects `claude` or `codex` CLI. Override with `CLI=codex` or `CLI=claude`. Override models with `MODEL_GENERATE` and `MODEL_GRADE` env vars.
+Override models with `MODEL_GENERATE` and `MODEL_GRADE` env vars:
+
+| | Claude | Codex (with OpenAI API key) |
+|---|---|---|
+| Default generate | `sonnet` | `gpt-4.1-mini` |
+| Default grade | `haiku` | `gpt-4.1-nano` |
+| Cheaper | `MODEL_GENERATE=haiku` | `MODEL_GENERATE=gpt-4.1-nano MODEL_GRADE=gpt-4.1-nano` |
+
+Codex with a ChatGPT account uses its default model and ignores `-m` — model overrides require an OpenAI API key (`codex login`).
 
 If neither CLI is available, run the same logic manually: for each eval in `jira/evals/evals.json`, paste the SKILL.md as system context, send the `prompt`, and check the response against the `expectations` array.
 
