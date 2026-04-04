@@ -40,10 +40,13 @@ Resolve the project key in this order:
 
 1. If the user gives a Jira issue key such as `MYPROJECT-1455`, use its prefix as the project key.
 2. If the user explicitly names a project key such as `MYPROJECT`, use that.
-3. Otherwise, read `config.json` in this skill's directory and use `defaultProject`.
-4. If the config file is missing, contains `"MYPROJECT"` (the placeholder), or is invalid, ask the user which project key to use before proceeding. Offer to update config.json with their answer so they don't get asked again.
+3. Otherwise, read `config.local.json` in this skill's directory. If it exists and has a valid `defaultProject`, use it.
+4. Otherwise, read `config.json` in this skill's directory and use `defaultProject`.
+5. If neither config file has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `config.local.json` so it persists across skill updates.
 
-Config schema:
+`config.local.json` is gitignored and never shipped with the skill, so `npx skills update` will not overwrite it. `config.json` is the schema reference and ships with the placeholder.
+
+Config schema (both files use the same shape):
 
 ```json
 {

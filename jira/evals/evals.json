@@ -133,6 +133,16 @@
         "Does NOT include `--priority`, Technical Impact, or Business Urgency flags.",
         "Explains that priority/urgency fields are left for triage."
       ]
+    },
+    {
+      "id": 13,
+      "prompt": "Create a task called 'Refactor auth module'. I haven't configured my project yet.",
+      "expected_output": "Asks the user for their project key and writes the answer to config.local.json, not config.json.",
+      "files": [],
+      "expectations": [
+        "Asks the user which project key to use before creating the task.",
+        "Writes the project key to `config.local.json`, not `config.json`."
+      ]
     }
   ]
 }

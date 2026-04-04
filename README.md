@@ -36,7 +36,7 @@ Notes:
 
 ## Configuration
 
-After installing, edit `config.json` in the skill directory and replace `MYPROJECT` with your Jira project key:
+Create a `config.local.json` in the skill directory with your Jira project key:
 
 ```json
 {
@@ -44,7 +44,9 @@ After installing, edit `config.json` in the skill directory and replace `MYPROJE
 }
 ```
 
-The skill will ask for your project key on first use if this is not configured.
+This file is gitignored and won't be overwritten by `npx skills update`. The shipped `config.json` is a schema reference with a placeholder — don't edit it directly.
+
+The skill will ask for your project key on first use if neither config file is configured, and save your answer to `config.local.json`.
 
 ## What Makes This Skill Stand Out
 
