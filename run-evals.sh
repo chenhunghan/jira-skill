@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: bash run-evals.sh [--triggers-only | --tasks-only]
+# Usage:
+#   bash run-evals.sh                  # run all
+#   bash run-evals.sh --triggers-only  # trigger evals only
+#   bash run-evals.sh --tasks-only     # task evals only
+#   bash run-evals.sh --task 7         # single task eval by id
+#   bash run-evals.sh --trigger 5      # single trigger eval by index (0-based)
 RUN_TASKS=true
 RUN_TRIGGERS=true
+SINGLE_TASK=""
+SINGLE_TRIGGER=""
 case "${1:-}" in
   --triggers-only) RUN_TASKS=false ;;
   --tasks-only) RUN_TRIGGERS=false ;;
+  --task) RUN_TRIGGERS=false; SINGLE_TASK="${2:?missing eval id}" ;;
+  --trigger) RUN_TASKS=false; SINGLE_TRIGGER="${2:?missing trigger index}" ;;
 esac
 
 SKILL_FILE="jira/SKILL.md"
@@ -60,6 +69,7 @@ EVAL_COUNT=$(jq '.evals | length' "$EVALS_FILE")
 
 for i in $(seq 0 $((EVAL_COUNT - 1))); do
   EVAL_ID=$(jq -r ".evals[$i].id" "$EVALS_FILE")
+  [ -n "$SINGLE_TASK" ] && [ "$EVAL_ID" != "$SINGLE_TASK" ] && continue
   PROMPT=$(jq -r ".evals[$i].prompt" "$EVALS_FILE")
   EXPECTATIONS=$(jq -r ".evals[$i].expectations[] | \"- \" + ." "$EVALS_FILE")
 
@@ -119,6 +129,7 @@ TRIGGER_PASS=0
 TRIGGER_FAIL=0
 
 for i in $(seq 0 $((TRIGGER_COUNT - 1))); do
+  [ -n "$SINGLE_TRIGGER" ] && [ "$i" != "$SINGLE_TRIGGER" ] && continue
   QUERY=$(jq -r ".[$i].query" "$TRIGGERS_FILE")
   EXPECTED=$(jq -r ".[$i].should_trigger" "$TRIGGERS_FILE")
 
