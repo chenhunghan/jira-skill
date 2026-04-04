@@ -17,22 +17,9 @@ An [Agent Skill](https://agentskills.io) for managing Jira work items with [Atla
 
 ## Install
 
-Install with [`npx skills`](https://github.com/vercel-labs/skills):
-
 ```sh
-npx skills add chenhunghan/jira-skill --skill jira -g -a codex -a claude-code -y
+npx skills add chenhunghan/jira-skill
 ```
-
-Or install directly from the skill path:
-
-```sh
-npx skills add https://github.com/chenhunghan/jira-skill/tree/main/jira -g -a codex -a claude-code -y
-```
-
-Notes:
-
-- Omit `-g` to install into the current project instead of your user-wide agent config.
-- Add or replace `-a` flags for other supported agents.
 
 ## Configuration
 
