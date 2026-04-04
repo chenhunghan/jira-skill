@@ -17,7 +17,7 @@ jq -r '"Trigger evals: \(length)"' jira/evals/trigger-evals.json
 
 ### Behavioral eval (requires `claude` CLI)
 
-`run-evals.sh` sends each eval prompt + the full SKILL.md to an LLM and grades the response against expectations. It uses `claude -p` (non-interactive print mode) and writes results to `jira-workspace/eval-run-1/`.
+`run-evals.sh` sends each eval prompt + the full SKILL.md + all `references/*.md` files to an LLM and grades the response against expectations. It uses `claude -p` (non-interactive print mode) and writes results to `jira-workspace/eval-run-1/`.
 
 ```bash
 bash run-evals.sh
@@ -33,3 +33,7 @@ If `claude` CLI is not available (e.g. Codex, Cursor), run the same logic manual
 ### Adding evals
 
 When adding a feature or safety rule to SKILL.md, add a corresponding eval. Task evals go in `evals.json`, trigger boundary cases go in `trigger-evals.json`.
+
+### Adding reference files
+
+Put new reference files in `jira/references/`. Add a pointer in SKILL.md that tells the agent when to load the file (e.g. "read `references/foo.md` if the user needs X"). `run-evals.sh` auto-discovers all `references/*.md` files and includes them in the eval context.
