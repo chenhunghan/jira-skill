@@ -91,18 +91,6 @@ We compared this skill against 8 popular Jira skills on [skills.sh](https://skil
 
 7. **Smallest footprint** — one `SKILL.md` (~350 lines), one `config.json`, and eval files. No Python runtime, no Docker, no external libraries beyond `acli` and `mdadf`. Competitors range from 14 Python scripts (netresearch) to 245 external scripts (grandcamel) to multi-container setups.
 
-### What we learned from competitors
-
-| Lesson | Source | How we applied it |
-|--------|--------|-------------------|
-| Explicit "NEVER" safety rules with reasoning | davila7 | Added 5 safety rules to SKILL.md with explanations |
-| Transition verification before status changes | davila7, SpillwaveSolutions | Added pre-transition fetch rule |
-| Conditional reference loading (don't bloat context) | davila7 | Already minimal by design; no reference files to load |
-| Risk stratification for operations | grandcamel | Added risk levels to commands reference |
-| Wiki markup vs Markdown distinction | netresearch | Our mdadf pipeline handles this automatically — no user-facing syntax switching |
-| Multi-profile / multi-instance support | netresearch | Deferred — acli handles profiles natively via `acli auth` |
-| Hub-and-spoke routing for large skill sets | grandcamel | Not applicable — single focused skill is our design choice |
-| Dry-run for write operations | netresearch | acli supports `--yes` flag; added guidance for confirm-before-mutate |
 
 ## License
 
