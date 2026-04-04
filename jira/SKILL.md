@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key first, then `.jira-skill.json` in the working directory, then `~/.config/jira-skill/config.json`, then the in-repo `config.json` placeholder. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), Confluence, auth setup, REST API scripting, or non-Jira trackers.
+description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project name first, then `.jira-skill.json` (searching up to repo root), then `~/.config/jira-skill/config.json`, then the in-repo `config.json` placeholder. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), Confluence, auth setup, REST API scripting, or non-Jira trackers.
 compatibility: Requires `acli` and `mdadf` CLI. Uses `zsh` or `bash` process substitution for piping ADF into acli flags. On Windows PowerShell, uses temp files instead.
 ---
 
@@ -18,10 +18,10 @@ Check that both dependencies are available before running any commands. Do this 
    - After install, authenticate with `acli auth login`
 
 2. **mdadf** — run `mdadf --version`. If missing, download the binary for your platform from https://github.com/chenhunghan/mdadf/releases/latest and place it on your PATH:
-   - macOS (Apple Silicon): `curl -L -o mdadf.tar.gz https://github.com/chenhunghan/mdadf/releases/latest/download/mdadf-aarch64-apple-darwin.tar.gz && tar xzf mdadf.tar.gz && mv mdadf /usr/local/bin/`
-   - macOS (Intel): replace `aarch64-apple-darwin` with `x86_64-apple-darwin`
-   - Linux (x86_64): replace with `x86_64-unknown-linux-gnu`
-   - Windows: download the `.zip` from the releases page and add to PATH
+   - macOS (Apple Silicon): `curl -L -o mdadf.tar.gz https://github.com/chenhunghan/mdadf/releases/latest/download/mdadf-darwin-arm64.tar.gz && tar xzf mdadf.tar.gz && mv mdadf /usr/local/bin/`
+   - macOS (Intel): replace `darwin-arm64` with `darwin-x64`
+   - Linux (x86_64): replace with `linux-x64`
+   - Windows: download `mdadf-windows-x64.zip` from the releases page and add to PATH
    - If sudo is needed: install to `$HOME/.local/bin` and ensure it is on PATH.
 
 If either tool is missing and cannot be installed (e.g. no network access), tell the user exactly what commands to run and stop.
@@ -42,10 +42,10 @@ Resolve the project key in this order:
 
 1. If the user gives a Jira issue key such as `MYPROJECT-1455`, use its prefix as the project key.
 2. If the user explicitly names a project key such as `MYPROJECT`, use that.
-3. Otherwise, read `.jira-skill.json` in the current working directory. If it exists and has a valid `defaultProject`, use it. This is the workspace-local config — different repos can have different defaults.
+3. Otherwise, search for `.jira-skill.json` starting from the current working directory and walking up parent directories until the repo root (the directory containing `.git`) is reached. If found and it has a valid `defaultProject`, use it. This is the workspace-local config — different repos can have different defaults.
 4. Otherwise, read `~/.config/jira-skill/config.json`. This is the user-global fallback, shared across all repos.
 5. Otherwise, read `config.json` in this skill's directory (shipped placeholder).
-6. If no config has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `.jira-skill.json` in the working directory if inside a project, or `~/.config/jira-skill/config.json` if in a global context.
+6. If no config has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `.jira-skill.json` in the repo root (the directory containing `.git`) if inside a repo, or `~/.config/jira-skill/config.json` otherwise.
 
 `.jira-skill.json` is workspace-local — add it to `.gitignore` if it should not be shared. `~/.config/jira-skill/config.json` is user-global and survives skill updates. The in-repo `config.json` is a schema reference and ships with a placeholder.
 
