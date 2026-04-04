@@ -79,5 +79,29 @@
   {
     "query": "use Linear instead of Jira and create an issue for the same bug",
     "should_trigger": false
+  },
+  {
+    "query": "move MYPROJECT-500 to Done and also close all the subtasks",
+    "should_trigger": true
+  },
+  {
+    "query": "show me the current status of MYPROJECT-200 before I update its description",
+    "should_trigger": true
+  },
+  {
+    "query": "set up a Jira automation rule to auto-assign tickets when they move to In Progress",
+    "should_trigger": false
+  },
+  {
+    "query": "configure the Jira project board columns and swimlanes",
+    "should_trigger": false
+  },
+  {
+    "query": "create a dashboard in Jira with a burndown chart and velocity widget",
+    "should_trigger": false
+  },
+  {
+    "query": "generate a branch name from MYPROJECT-801 following our naming convention",
+    "should_trigger": false
   }
 ]

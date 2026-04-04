@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, otherwise use the configured default project from config.json in the skill directory. Do not use it for GitHub PR edits, repo searches, Confluence, auth setup, REST API scripting, or non-Jira trackers.
+description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, otherwise use the configured default project from config.json in the skill directory. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), Confluence, auth setup, REST API scripting, or non-Jira trackers.
 compatibility: Requires `acli` and `mdadf` CLI. Uses `zsh` or `bash` process substitution for piping ADF into acli flags. On Windows PowerShell, uses temp files instead.
 ---
 
@@ -51,9 +51,23 @@ Config schema:
 }
 ```
 
+## Safety Rules
+
+These rules prevent common Jira mishaps. Follow them without exception.
+
+1. **NEVER transition without fetching current status first.** Jira workflows may require intermediate states (e.g. To Do → In Progress → In Review → Done). Skipping a step fails silently or throws a confusing error. Always run `acli jira workitem view <KEY> --fields "status"` before any transition.
+
+2. **NEVER bulk-modify without explicit user approval.** Each edit notifies watchers. Editing 10 tickets means 10 notification storms. Always confirm with the user before operating on multiple work items.
+
+3. **NEVER edit a description without showing the original.** Jira has no undo. Before replacing a description, display the current content so the user can verify nothing is lost.
+
+4. **NEVER assume transition names are universal.** "Done", "Closed", "Complete", "Resolved" vary by project and workflow scheme. When in doubt, list available transitions with `acli jira workitem transition --key <KEY> --list` first.
+
+5. **NEVER set Priority, Technical Impact, or Business Urgency on new tickets.** These fields are for triage by leads or product. Creating a "Critical" ticket without authorization undermines the triage process. If the user explicitly requests a priority level, acknowledge it and explain that priority is typically set during triage.
+
 ## Execution Steps
 
-1. Determine whether the request is read-only or mutating.
+1. If the request is mutating, review the Safety Rules above. Identify which rules apply before running any command.
 2. Resolve the project key using the project resolution rules above.
 3. If the request targets a specific work item key, use a key-based command. Use JQL only when searching or targeting multiple work items.
 4. If the request needs rich text, write the content in Markdown and convert it to ADF with `mdadf --compact` before running `acli`.
@@ -159,7 +173,9 @@ Bug drafting rules:
 
 ## Commands Reference
 
-### View Work Item
+Risk levels: `-` safe/read-only, `!` reversible mutation, `!!` hard to reverse.
+
+### View Work Item `-`
 
 ```bash
 acli jira workitem view MYPROJECT-1455 --fields "summary,comment"
@@ -173,7 +189,7 @@ acli jira workitem view MYPROJECT-1455 --fields "summary,comment"
   - `-description` - excludes description from default fields
   - Default: `key,issuetype,summary,status,assignee,description`
 
-### Create Work Item
+### Create Work Item `!`
 
 ```bash
 acli jira workitem create \
@@ -215,7 +231,9 @@ MD
 - `--description-file string` - Description file in plain text or ADF
 - `-l, --label strings` - Labels (comma-separated)
 
-### Edit Work Item
+### Edit Work Item `!!`
+
+Before editing, fetch and display the current content so the user can verify nothing is lost (Safety Rule 3).
 
 ```bash
 acli jira workitem edit \
@@ -241,7 +259,7 @@ MD
 - `--remove-assignee` - Remove assignee
 - `-y, --yes` - Confirm without prompting
 
-### Create Comment
+### Create Comment `!`
 
 ```bash
 acli jira workitem comment create \
@@ -260,7 +278,7 @@ MD
 - `-F, --body-file string` - Comment body file in plain text or ADF
 - `--editor` - Open an editor for the body instead of passing content directly
 
-### Update Comment
+### Update Comment `!!`
 
 ```bash
 acli jira workitem comment update \
@@ -279,7 +297,7 @@ MD
 - `--body-adf string` - Comment body in ADF JSON file
 - `-F, --body-file string` - Comment body in plain text file
 
-### Search Work Items
+### Search Work Items `-`
 
 ```bash
 acli jira workitem search --jql "project = MYPROJECT AND assignee = currentUser() AND sprint in openSprints()"
@@ -293,13 +311,18 @@ acli jira workitem search --jql "project = MYPROJECT AND assignee = currentUser(
 - `created >= -7d` - Created in last 7 days
 - `type = Bug AND priority = High` - High priority bugs
 
-### Transition Work Item
+### Transition Work Item `!`
+
+Before transitioning, fetch the current status to confirm the target state is reachable (Safety Rule 1). If unsure which transitions are available, list them first.
 
 ```bash
 acli jira workitem transition --key "MYPROJECT-733" --status "In Review"
 ```
 
-### Assign Work Item
+**Flags:**
+- `--list` - List available transitions for the work item instead of executing one
+
+### Assign Work Item `!`
 
 ```bash
 acli jira workitem assign --key "MYPROJECT-801" --assignee "alex@example.com"
