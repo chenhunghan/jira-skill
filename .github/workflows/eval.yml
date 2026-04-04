@@ -1,0 +1,54 @@
+name: Skill Evals
+
+on:
+  pull_request:
+    paths:
+      - "jira/SKILL.md"
+      - "jira/evals/**"
+      - "jira/config.json"
+  push:
+    branches: [main]
+    paths:
+      - "jira/SKILL.md"
+      - "jira/evals/**"
+      - "jira/config.json"
+
+jobs:
+  structural:
+    name: Structural validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate eval JSON and count cases
+        run: |
+          python3 -c "
+          import json, sys
+
+          evals = json.load(open('jira/evals/evals.json'))['evals']
+          triggers = json.load(open('jira/evals/trigger-evals.json'))
+
+          errors = []
+          for e in evals:
+              for field in ['id', 'prompt', 'expectations']:
+                  if field not in e:
+                      errors.append(f'Eval #{e.get(\"id\",\"?\")} missing {field}')
+              if 'expectations' in e and len(e['expectations']) == 0:
+                  errors.append(f'Eval #{e[\"id\"]} has empty expectations')
+
+          for i, t in enumerate(triggers):
+              for field in ['query', 'should_trigger']:
+                  if field not in t:
+                      errors.append(f'Trigger #{i} missing {field}')
+
+          if errors:
+              for err in errors:
+                  print(f'::error::{err}')
+              sys.exit(1)
+
+          true_count = sum(1 for t in triggers if t['should_trigger'])
+          false_count = sum(1 for t in triggers if not t['should_trigger'])
+          print(f'Task evals: {len(evals)}')
+          print(f'Trigger evals: {len(triggers)} ({true_count} true, {false_count} false)')
+          print('All valid.')
+          "
