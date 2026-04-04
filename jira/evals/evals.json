@@ -155,6 +155,17 @@
         "Uses `startOfWeek()` or `AFTER -7d` for the time range.",
         "Uses `membersOf(\"dev-team\")` or equivalent group function."
       ]
+    },
+    {
+      "id": 15,
+      "prompt": "I just switched to a different repo. Create a task called 'Set up CI pipeline'.",
+      "expected_output": "Re-resolves the project key from the current working directory instead of reusing a cached value from a previous request.",
+      "files": [],
+      "expectations": [
+        "Does not reuse a project key from a previous request or assume the project is already known.",
+        "Searches for `.jira-skill.json` starting from the current working directory.",
+        "If no config is found, asks the user which project key to use."
+      ]
     }
   ]
 }
