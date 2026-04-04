@@ -22,33 +22,22 @@ jobs:
 
       - name: Validate eval JSON and count cases
         run: |
-          python3 -c "
-          import json, sys
+          # Validate evals.json — checks required fields and non-empty expectations
+          INVALID_EVALS=$(jq '[.evals[] | select(.id == null or .prompt == null or .expectations == null or (.expectations | length) == 0)] | length' jira/evals/evals.json)
+          if [ "$INVALID_EVALS" -gt 0 ]; then
+            echo "::error::$INVALID_EVALS eval(s) missing required fields or have empty expectations:"
+            jq -r '.evals[] | select(.id == null or .prompt == null or .expectations == null or (.expectations | length) == 0) | "  eval #\(.id // "?")"' jira/evals/evals.json
+            exit 1
+          fi
 
-          evals = json.load(open('jira/evals/evals.json'))['evals']
-          triggers = json.load(open('jira/evals/trigger-evals.json'))
+          # Validate trigger-evals.json — checks required fields
+          INVALID_TRIGGERS=$(jq '[.[] | select(.query == null or .should_trigger == null)] | length' jira/evals/trigger-evals.json)
+          if [ "$INVALID_TRIGGERS" -gt 0 ]; then
+            echo "::error::$INVALID_TRIGGERS trigger(s) missing required fields"
+            exit 1
+          fi
 
-          errors = []
-          for e in evals:
-              for field in ['id', 'prompt', 'expectations']:
-                  if field not in e:
-                      errors.append(f'Eval #{e.get(\"id\",\"?\")} missing {field}')
-              if 'expectations' in e and len(e['expectations']) == 0:
-                  errors.append(f'Eval #{e[\"id\"]} has empty expectations')
-
-          for i, t in enumerate(triggers):
-              for field in ['query', 'should_trigger']:
-                  if field not in t:
-                      errors.append(f'Trigger #{i} missing {field}')
-
-          if errors:
-              for err in errors:
-                  print(f'::error::{err}')
-              sys.exit(1)
-
-          true_count = sum(1 for t in triggers if t['should_trigger'])
-          false_count = sum(1 for t in triggers if not t['should_trigger'])
-          print(f'Task evals: {len(evals)}')
-          print(f'Trigger evals: {len(triggers)} ({true_count} true, {false_count} false)')
-          print('All valid.')
-          "
+          # Summary
+          jq -r '"Task evals: \(.evals | length)"' jira/evals/evals.json
+          jq -r '"Trigger evals: \(length) (\(map(select(.should_trigger)) | length) true, \(map(select(.should_trigger | not)) | length) false)"' jira/evals/trigger-evals.json
+          echo "All valid."

@@ -47,12 +47,12 @@ IMPORTANT: You must follow every instruction in the skill including Safety Rules
 echo '{"task_evals":[],"trigger_evals":[]}' > "$RESULTS_FILE"
 
 echo "=== RUNNING TASK-LEVEL EVALS ==="
-EVAL_COUNT=$(python3 -c "import json; print(len(json.load(open('$EVALS_FILE'))['evals']))")
+EVAL_COUNT=$(jq '.evals | length' "$EVALS_FILE")
 
 for i in $(seq 0 $((EVAL_COUNT - 1))); do
-  EVAL_ID=$(python3 -c "import json; print(json.load(open('$EVALS_FILE'))['evals'][$i]['id'])")
-  PROMPT=$(python3 -c "import json; print(json.load(open('$EVALS_FILE'))['evals'][$i]['prompt'])")
-  EXPECTATIONS=$(python3 -c "import json; exps=json.load(open('$EVALS_FILE'))['evals'][$i]['expectations']; print('\n'.join(f'- {e}' for e in exps))")
+  EVAL_ID=$(jq -r ".evals[$i].id" "$EVALS_FILE")
+  PROMPT=$(jq -r ".evals[$i].prompt" "$EVALS_FILE")
+  EXPECTATIONS=$(jq -r ".evals[$i].expectations[] | \"- \" + ." "$EVALS_FILE")
 
   echo ""
   echo "--- Eval #$EVAL_ID: ${PROMPT:0:60}..."
@@ -102,14 +102,14 @@ done
 
 echo ""
 echo "=== RUNNING TRIGGER-LEVEL EVALS ==="
-TRIGGER_COUNT=$(python3 -c "import json; print(len(json.load(open('$TRIGGERS_FILE'))))")
+TRIGGER_COUNT=$(jq 'length' "$TRIGGERS_FILE")
 
 TRIGGER_PASS=0
 TRIGGER_FAIL=0
 
 for i in $(seq 0 $((TRIGGER_COUNT - 1))); do
-  QUERY=$(python3 -c "import json; print(json.load(open('$TRIGGERS_FILE'))[$i]['query'])")
-  EXPECTED=$(python3 -c "import json; print(json.load(open('$TRIGGERS_FILE'))[$i]['should_trigger'])")
+  QUERY=$(jq -r ".[$i].query" "$TRIGGERS_FILE")
+  EXPECTED=$(jq -r ".[$i].should_trigger" "$TRIGGERS_FILE")
 
   TRIGGER_PROMPT="Given this skill description (from SKILL.md frontmatter):
 
@@ -127,7 +127,7 @@ Query: \"$QUERY\""
 
   ANSWER_LOWER=$(echo "$ANSWER" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
 
-  if [ "$EXPECTED" = "True" ] || [ "$EXPECTED" = "true" ]; then
+  if [ "$EXPECTED" = "true" ]; then
     EXPECTED_ANSWER="yes"
   else
     EXPECTED_ANSWER="no"
