@@ -39,7 +39,6 @@ To set it ahead of time, create `.jira-skill.json` in your repo:
 - **Zero setup** — asks for your project key on first use. No Python, no Docker, no config files required to get started.
 - **Tested** — 38 evals verify correct commands, safety rules, and that the skill only triggers for Jira work (not GitHub PRs, Confluence, etc.).
 
-Compared against [8 other Jira skills](https://skills.sh/?q=jira) — see the [competitive analysis](https://github.com/chenhunghan/jira-skill/commit/12684e0) for details.
 
 
 ## License
