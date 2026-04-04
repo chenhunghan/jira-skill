@@ -27,8 +27,8 @@ If `claude` CLI is not available (e.g. Codex, Cursor), run the same logic manual
 
 ### What to check
 
-- **Task evals** (`jira/evals/evals.json`, 14 cases): Does the agent produce correct `acli` commands, follow safety rules, use `mdadf --compact`, and respect operating constraints?
-- **Trigger evals** (`jira/evals/trigger-evals.json`, 26 cases): Does the skill description trigger for Jira work (`should_trigger: true`) and stay silent for GitHub PRs, Confluence, auth setup, etc. (`should_trigger: false`)?
+- **Task evals** (`jira/evals/evals.json`): Does the agent produce correct `acli` commands, follow safety rules, use `mdadf --compact`, and respect operating constraints?
+- **Trigger evals** (`jira/evals/trigger-evals.json`): Does the skill description trigger for Jira work (`should_trigger: true`) and stay silent for GitHub PRs, Confluence, auth setup, etc. (`should_trigger: false`)?
 
 ### Adding evals
 
