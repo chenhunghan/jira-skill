@@ -2,11 +2,14 @@
 set -euo pipefail
 
 # Usage:
-#   bash run-evals.sh                  # run all
-#   bash run-evals.sh --triggers-only  # trigger evals only
-#   bash run-evals.sh --tasks-only     # task evals only
-#   bash run-evals.sh --task 7         # single task eval by id
-#   bash run-evals.sh --trigger 5      # single trigger eval by index (0-based)
+#   bash run-evals.sh                       # run all (auto-detects claude or codex)
+#   bash run-evals.sh --triggers-only       # trigger evals only
+#   bash run-evals.sh --tasks-only          # task evals only
+#   bash run-evals.sh --task 7              # single task eval by id
+#   bash run-evals.sh --trigger 5           # single trigger eval by index (0-based)
+#   CLI=codex bash run-evals.sh             # force codex backend
+#   CLI=claude bash run-evals.sh            # force claude backend
+
 RUN_TASKS=true
 RUN_TRIGGERS=true
 SINGLE_TASK=""
@@ -17,6 +20,65 @@ case "${1:-}" in
   --task) RUN_TRIGGERS=false; SINGLE_TASK="${2:?missing eval id}" ;;
   --trigger) RUN_TASKS=false; SINGLE_TRIGGER="${2:?missing trigger index}" ;;
 esac
+
+# Auto-detect CLI backend
+if [ -z "${CLI:-}" ]; then
+  if command -v claude >/dev/null 2>&1; then
+    CLI=claude
+  elif command -v codex >/dev/null 2>&1; then
+    CLI=codex
+  else
+    echo "Error: neither 'claude' nor 'codex' CLI found. Install one or set CLI=<path>." >&2
+    exit 1
+  fi
+fi
+echo "Using CLI: $CLI"
+
+# Model selection per backend
+case "$CLI" in
+  claude|*/claude)
+    MODEL_GENERATE="${MODEL_GENERATE:-sonnet}"
+    MODEL_GRADE="${MODEL_GRADE:-haiku}"
+    ;;
+  codex|*/codex)
+    MODEL_GENERATE="${MODEL_GENERATE:-}"
+    MODEL_GRADE="${MODEL_GRADE:-}"
+    ;;
+  *)
+    MODEL_GENERATE="${MODEL_GENERATE:-}"
+    MODEL_GRADE="${MODEL_GRADE:-}"
+    ;;
+esac
+echo "Models: generate=$MODEL_GENERATE grade=$MODEL_GRADE"
+
+# CLI-agnostic prompt runner
+# Usage: run_prompt <model> <system_prompt> <user_prompt>
+run_prompt() {
+  local model="$1" system="$2" prompt="$3"
+  case "$CLI" in
+    claude|*/claude)
+      claude -p \
+        --system-prompt "$system" \
+        --allowedTools "" \
+        --model "$model" \
+        --max-turns 1 \
+        "$prompt" 2>/dev/null
+      ;;
+    codex|*/codex)
+      local tmpout codex_args
+      tmpout=$(mktemp)
+      codex_args=(exec --sandbox read-only -o "$tmpout")
+      [ -n "$model" ] && codex_args+=(-m "$model")
+      echo "$system" | codex "${codex_args[@]}" "$prompt" >/dev/null 2>&1 || true
+      cat "$tmpout"
+      rm -f "$tmpout"
+      ;;
+    *)
+      echo "Error: unsupported CLI '$CLI'" >&2
+      return 1
+      ;;
+  esac
+}
 
 SKILL_FILE="jira/SKILL.md"
 EVALS_FILE="jira/evals/evals.json"
@@ -76,16 +138,11 @@ for i in $(seq 0 $((EVAL_COUNT - 1))); do
   echo ""
   echo "--- Eval #$EVAL_ID: ${PROMPT:0:60}..."
 
-  RESPONSE=$(claude -p \
-    --system-prompt "$SYSTEM_PROMPT" \
-    --allowedTools "" \
-    --model sonnet \
-    --max-turns 1 \
-    "$PROMPT" 2>/dev/null) || { echo "  [ERROR] claude CLI failed"; continue; }
+  RESPONSE=$(run_prompt "$MODEL_GENERATE" "$SYSTEM_PROMPT" "$PROMPT") || { echo "  [ERROR] generate failed"; continue; }
 
   echo "$RESPONSE" > "$OUT_DIR/eval-${EVAL_ID}-response.txt"
 
-  # Now grade the response against expectations
+  # Grade the response against expectations
   GRADE_PROMPT="Grade this AI agent response against the expected behaviors. For each expectation, answer PASS or FAIL with a brief reason.
 
 Response to grade:
@@ -99,11 +156,7 @@ $EXPECTATIONS
 Output format — one line per expectation, nothing else:
 PASS|FAIL: <expectation summary> — <reason>"
 
-  GRADE=$(claude -p \
-    --allowedTools "" \
-    --model haiku \
-    --max-turns 1 \
-    "$GRADE_PROMPT" 2>/dev/null) || { echo "  [ERROR] grading failed"; continue; }
+  GRADE=$(run_prompt "$MODEL_GRADE" "" "$GRADE_PROMPT") || { echo "  [ERROR] grading failed"; continue; }
 
   echo "$GRADE" > "$OUT_DIR/eval-${EVAL_ID}-grade.txt"
 
@@ -141,11 +194,7 @@ Should this skill activate for the following user query? Answer ONLY 'yes' or 'n
 
 Query: \"$QUERY\""
 
-  ANSWER=$(claude -p \
-    --allowedTools "" \
-    --model haiku \
-    --max-turns 1 \
-    "$TRIGGER_PROMPT" 2>/dev/null) || { echo "  [ERROR] trigger eval failed for: ${QUERY:0:50}"; continue; }
+  ANSWER=$(run_prompt "$MODEL_GRADE" "" "$TRIGGER_PROMPT") || { echo "  [ERROR] trigger eval failed for: ${QUERY:0:50}"; continue; }
 
   ANSWER_LOWER=$(echo "$ANSWER" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
 

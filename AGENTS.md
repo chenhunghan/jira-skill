@@ -20,14 +20,18 @@ jq -r '"Trigger evals: \(length)"' jira/evals/trigger-evals.json
 `run-evals.sh` sends each eval prompt + the full SKILL.md + all `references/*.md` files to an LLM and grades the response against expectations. It uses `claude -p` (non-interactive print mode) and writes results to `jira-workspace/eval-run-1/`.
 
 ```bash
-bash run-evals.sh                  # run all
-bash run-evals.sh --triggers-only  # trigger evals only
-bash run-evals.sh --tasks-only     # task evals only
-bash run-evals.sh --task 7         # single task eval by id
-bash run-evals.sh --trigger 25     # single trigger eval by index (0-based)
+bash run-evals.sh                       # run all (auto-detects claude or codex)
+bash run-evals.sh --triggers-only       # trigger evals only
+bash run-evals.sh --tasks-only          # task evals only
+bash run-evals.sh --task 7              # single task eval by id
+bash run-evals.sh --trigger 25          # single trigger eval by index (0-based)
+CLI=codex bash run-evals.sh             # force codex backend
+MODEL_GENERATE=haiku bash run-evals.sh  # override model
 ```
 
-If `claude` CLI is not available (e.g. Codex, Cursor), run the same logic manually: for each eval in `jira/evals/evals.json`, paste the SKILL.md as system context, send the `prompt`, and check the response against the `expectations` array. The expectations are plain-English assertions — no test framework needed.
+The script auto-detects `claude` or `codex` CLI. Override with `CLI=codex` or `CLI=claude`. Override models with `MODEL_GENERATE` and `MODEL_GRADE` env vars.
+
+If neither CLI is available, run the same logic manually: for each eval in `jira/evals/evals.json`, paste the SKILL.md as system context, send the `prompt`, and check the response against the `expectations` array.
 
 ### What to check
 
