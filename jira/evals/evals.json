@@ -137,11 +137,11 @@
     {
       "id": 13,
       "prompt": "Create a task called 'Refactor auth module'. I haven't configured my project yet.",
-      "expected_output": "Asks the user for their project key and writes the answer to ~/.config/jira-skill/config.json.",
+      "expected_output": "Asks the user for their project key and writes the answer to .jira-skill.json or ~/.config/jira-skill/config.json.",
       "files": [],
       "expectations": [
         "Asks the user which project key to use before creating the task.",
-        "Writes the project key to `~/.config/jira-skill/config.json`, not the in-repo config.json."
+        "Writes the project key to `.jira-skill.json` (workspace) or `~/.config/jira-skill/config.json` (global), not the in-repo config.json."
       ]
     }
   ]

@@ -36,16 +36,28 @@ Notes:
 
 ## Configuration
 
-Create `~/.config/jira-skill/config.json` with your Jira project key:
+The skill looks for `defaultProject` in this order:
+
+| Location | Scope | Survives update? |
+|----------|-------|-----------------|
+| `.jira-skill.json` in working directory | Per-repo | Yes |
+| `~/.config/jira-skill/config.json` | User-global | Yes |
+| `config.json` in skill directory | Placeholder | No (overwritten) |
+
+**Per-repo** (recommended for multi-project users):
+
+```bash
+echo '{"defaultProject": "YOUR_PROJECT_KEY"}' > .jira-skill.json
+```
+
+**User-global** (single project or fallback):
 
 ```bash
 mkdir -p ~/.config/jira-skill
 echo '{"defaultProject": "YOUR_PROJECT_KEY"}' > ~/.config/jira-skill/config.json
 ```
 
-This file lives outside the skill directory, so `npx skills update` will never overwrite it. The shipped `config.json` inside the skill is a schema reference with a placeholder — don't edit it directly.
-
-The skill will ask for your project key on first use if no config is found, and save your answer to `~/.config/jira-skill/config.json`.
+The skill will ask on first use if no config is found, and save to `.jira-skill.json` (in a project) or `~/.config/jira-skill/config.json` (global context).
 
 ## What Makes This Skill Stand Out
 
@@ -73,7 +85,7 @@ We compared this skill against 8 popular Jira skills on [skills.sh](https://skil
 
 4. **Constraint-based safety model** — explicit mutation-intent requirement (won't change Jira unless the user asks), read-only for projects (never modifies project config), and key-first targeting (prefers direct key commands over JQL for single items). Competitors either lack safety rules entirely or document them as informal guidance.
 
-5. **4-level project resolution** — issue key prefix → explicit project name → `config.json` default → ask user (with offer to save). Most competitors require the project every time or assume a single hardcoded default.
+5. **5-level project resolution** — issue key prefix → explicit project name → workspace `.jira-skill.json` → user-global `~/.config/jira-skill/config.json` → ask user (with offer to save). Workspace-local config means different repos get different defaults. Most competitors require the project every time or assume a single hardcoded default.
 
 6. **Dual-layer eval suite (38 cases)** — 12 task-level behavioral evals + 26 trigger-level evals (12 true, 14 false). The false-positive trigger tests are unique: they verify the skill does NOT activate for GitHub PRs, Confluence, auth setup, REST scripting, dashboards, automation rules, or non-Jira trackers. No other surveyed skill has trigger-boundary testing.
 

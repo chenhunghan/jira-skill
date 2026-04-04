@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, otherwise use the configured default project from config.json in the skill directory. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), Confluence, auth setup, REST API scripting, or non-Jira trackers.
+description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key first, then `.jira-skill.json` in the working directory, then `~/.config/jira-skill/config.json`, then the in-repo `config.json` placeholder. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), Confluence, auth setup, REST API scripting, or non-Jira trackers.
 compatibility: Requires `acli` and `mdadf` CLI. Uses `zsh` or `bash` process substitution for piping ADF into acli flags. On Windows PowerShell, uses temp files instead.
 ---
 
@@ -17,8 +17,11 @@ Check that both dependencies are available before running any commands. Do this 
    - Linux/Windows: download from https://developer.atlassian.com/cloud/acli/guides/install-acli/
    - After install, authenticate with `acli auth login`
 
-2. **mdadf** — run `mdadf --version`. If missing:
-   - Download the binary for your platform from https://github.com/chenhunghan/mdadf/releases/latest and place it on your PATH.
+2. **mdadf** — run `mdadf --version`. If missing, download the binary for your platform from https://github.com/chenhunghan/mdadf/releases/latest and place it on your PATH:
+   - macOS (Apple Silicon): `curl -L -o mdadf.tar.gz https://github.com/chenhunghan/mdadf/releases/latest/download/mdadf-aarch64-apple-darwin.tar.gz && tar xzf mdadf.tar.gz && mv mdadf /usr/local/bin/`
+   - macOS (Intel): replace `aarch64-apple-darwin` with `x86_64-apple-darwin`
+   - Linux (x86_64): replace with `x86_64-unknown-linux-gnu`
+   - Windows: download the `.zip` from the releases page and add to PATH
    - If sudo is needed: install to `$HOME/.local/bin` and ensure it is on PATH.
 
 If either tool is missing and cannot be installed (e.g. no network access), tell the user exactly what commands to run and stop.
@@ -29,7 +32,7 @@ If either tool is missing and cannot be installed (e.g. no network access), tell
 - **Mutation Intent**: For create, edit, transition, assign, comment, or delete operations, only mutate Jira when the user explicitly asks for that change. If the request is ambiguous, clarify before mutating.
 - **Key-First Targeting**: If the user provides a work item key such as `MYPROJECT-1455`, prefer key-based commands over JQL.
 - **JQL**: Use `--jql` for selecting, searching, or filtering work items when applicable.
-- **Configured Default Project**: If the user does not specify a project, use `defaultProject` from `config.json` in this skill's directory.
+- **Configured Default Project**: If the user does not specify a project, resolve via the Project Resolution chain below (workspace `.jira-skill.json` → user-global `~/.config/jira-skill/config.json` → in-repo `config.json`).
 - **Work Item Types**: `Bug`, `Task`, `Story`, `Epic`
 - **Rich Text**: Draft Jira descriptions and comment bodies in Markdown first, then convert to ADF with `mdadf --compact` before calling `acli`.
 
@@ -39,11 +42,12 @@ Resolve the project key in this order:
 
 1. If the user gives a Jira issue key such as `MYPROJECT-1455`, use its prefix as the project key.
 2. If the user explicitly names a project key such as `MYPROJECT`, use that.
-3. Otherwise, read `~/.config/jira-skill/config.json`. If it exists and has a valid `defaultProject`, use it.
-4. Otherwise, read `config.json` in this skill's directory and use `defaultProject`.
-5. If neither config file has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `~/.config/jira-skill/config.json` so it persists across skill updates.
+3. Otherwise, read `.jira-skill.json` in the current working directory. If it exists and has a valid `defaultProject`, use it. This is the workspace-local config — different repos can have different defaults.
+4. Otherwise, read `~/.config/jira-skill/config.json`. This is the user-global fallback, shared across all repos.
+5. Otherwise, read `config.json` in this skill's directory (shipped placeholder).
+6. If no config has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `.jira-skill.json` in the working directory if inside a project, or `~/.config/jira-skill/config.json` if in a global context.
 
-User config lives in `~/.config/jira-skill/config.json` — outside the skill directory — so `npx skills update` cannot overwrite it. The in-repo `config.json` is a schema reference with a placeholder value.
+`.jira-skill.json` is workspace-local — add it to `.gitignore` if it should not be shared. `~/.config/jira-skill/config.json` is user-global and survives skill updates. The in-repo `config.json` is a schema reference and ships with a placeholder.
 
 Config schema (both files use the same shape):
 
