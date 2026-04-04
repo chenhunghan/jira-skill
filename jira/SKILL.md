@@ -317,6 +317,8 @@ acli jira workitem search --jql "project = MYPROJECT AND assignee = currentUser(
 - `created >= -7d` - Created in last 7 days
 - `type = Bug AND priority = High` - High priority bugs
 
+For complex queries (historical operators, date functions, linked issues, team membership), read [references/jql-patterns.md](references/jql-patterns.md).
+
 ### Transition Work Item `!`
 
 Before transitioning, fetch the current status with `acli jira workitem view <KEY> --fields "status"` to confirm the target state is reachable (Safety Rule 1).

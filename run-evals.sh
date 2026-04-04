@@ -11,6 +11,20 @@ mkdir -p "$OUT_DIR"
 
 SKILL_CONTENT=$(<"$SKILL_FILE")
 
+# Load reference files if they exist
+REFS_CONTENT=""
+REFS_DIR="jira/references"
+if [ -d "$REFS_DIR" ]; then
+  for ref_file in "$REFS_DIR"/*.md; do
+    [ -f "$ref_file" ] || continue
+    REFS_CONTENT+="
+<reference path=\"${ref_file#jira/}\">
+$(<"$ref_file")
+</reference>
+"
+  done
+fi
+
 SYSTEM_PROMPT="You are evaluating a Jira skill for Claude Code. The skill instructs an AI agent how to manage Jira work items using acli and mdadf.
 
 Here is the full SKILL.md content the agent would receive:
@@ -18,7 +32,9 @@ Here is the full SKILL.md content the agent would receive:
 <skill>
 $SKILL_CONTENT
 </skill>
-
+${REFS_CONTENT:+
+The skill also has these reference files available. Use them when SKILL.md tells you to:
+$REFS_CONTENT}
 You are role-playing as the agent that has loaded this skill. When given a user prompt, respond EXACTLY as the agent would: produce the acli commands you would run, explain your reasoning, and follow all rules in the skill. Do NOT actually execute commands. Do NOT use any MCP tools. Just show what you WOULD do.
 
 IMPORTANT: You must follow every instruction in the skill including Safety Rules, Operating Constraints, and Execution Steps."

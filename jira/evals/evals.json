@@ -143,6 +143,18 @@
         "Asks the user which project key to use before creating the task.",
         "Writes the project key to `.jira-skill.json` (workspace) or `~/.config/jira-skill/config.json` (global), not the in-repo config.json."
       ]
+    },
+    {
+      "id": 14,
+      "prompt": "Find all MYPROJECT bugs that changed status to Done this week, assigned to anyone on the dev-team group.",
+      "expected_output": "Builds a JQL query using CHANGED, startOfWeek(), and membersOf() — patterns from the reference file, not the common patterns in SKILL.md.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem search --jql` with a JQL query.",
+        "Uses `status CHANGED TO \"Done\"` or equivalent historical operator.",
+        "Uses `startOfWeek()` or `AFTER -7d` for the time range.",
+        "Uses `membersOf(\"dev-team\")` or equivalent group function."
+      ]
     }
   ]
 }
