@@ -7,7 +7,7 @@ Two eval layers:
 
 ## Setup
 
-Replace `MYPROJECT` with your actual Jira project key in `config.json`.
+Create `~/.config/jira-skill/config.json` with your actual Jira project key (see the root README for details). The in-repo `config.json` is a placeholder and should not be edited.
 
 ## Workspace
 

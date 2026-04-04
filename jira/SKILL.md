@@ -18,9 +18,8 @@ Check that both dependencies are available before running any commands. Do this 
    - After install, authenticate with `acli auth login`
 
 2. **mdadf** — run `mdadf --version`. If missing:
-   - macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/chenhunghan/mdadf/main/install.sh | sh`
-   - Windows PowerShell: `irm https://raw.githubusercontent.com/chenhunghan/mdadf/main/install.ps1 | iex`
-   - If sudo is needed: `export MDADF_INSTALL="$HOME/.local/bin"` before running the installer
+   - Download the binary for your platform from https://github.com/chenhunghan/mdadf/releases/latest and place it on your PATH.
+   - If sudo is needed: install to `$HOME/.local/bin` and ensure it is on PATH.
 
 If either tool is missing and cannot be installed (e.g. no network access), tell the user exactly what commands to run and stop.
 
@@ -40,11 +39,11 @@ Resolve the project key in this order:
 
 1. If the user gives a Jira issue key such as `MYPROJECT-1455`, use its prefix as the project key.
 2. If the user explicitly names a project key such as `MYPROJECT`, use that.
-3. Otherwise, read `config.local.json` in this skill's directory. If it exists and has a valid `defaultProject`, use it.
+3. Otherwise, read `~/.config/jira-skill/config.json`. If it exists and has a valid `defaultProject`, use it.
 4. Otherwise, read `config.json` in this skill's directory and use `defaultProject`.
-5. If neither config file has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `config.local.json` so it persists across skill updates.
+5. If neither config file has a valid project (missing, placeholder `"MYPROJECT"`, or invalid), ask the user which project key to use. Write their answer to `~/.config/jira-skill/config.json` so it persists across skill updates.
 
-`config.local.json` is gitignored and never shipped with the skill, so `npx skills update` will not overwrite it. `config.json` is the schema reference and ships with the placeholder.
+User config lives in `~/.config/jira-skill/config.json` — outside the skill directory — so `npx skills update` cannot overwrite it. The in-repo `config.json` is a schema reference with a placeholder value.
 
 Config schema (both files use the same shape):
 
@@ -64,7 +63,7 @@ These rules prevent common Jira mishaps. Follow them without exception.
 
 3. **NEVER edit a description without showing the original.** Jira has no undo. Before replacing a description, display the current content so the user can verify nothing is lost.
 
-4. **NEVER assume transition names are universal.** "Done", "Closed", "Complete", "Resolved" vary by project and workflow scheme. When in doubt, list available transitions with `acli jira workitem transition --key <KEY> --list` first.
+4. **NEVER assume transition names are universal.** "Done", "Closed", "Complete", "Resolved" vary by project and workflow scheme. When in doubt, check the current status with `acli jira workitem view <KEY> --fields "status"` and ask the user which target status to use.
 
 5. **NEVER set Priority, Technical Impact, or Business Urgency on new tickets.** These fields are for triage by leads or product. Creating a "Critical" ticket without authorization undermines the triage process. If the user explicitly requests a priority level, acknowledge it and explain that priority is typically set during triage.
 
@@ -316,14 +315,11 @@ acli jira workitem search --jql "project = MYPROJECT AND assignee = currentUser(
 
 ### Transition Work Item `!`
 
-Before transitioning, fetch the current status to confirm the target state is reachable (Safety Rule 1). If unsure which transitions are available, list them first.
+Before transitioning, fetch the current status with `acli jira workitem view <KEY> --fields "status"` to confirm the target state is reachable (Safety Rule 1).
 
 ```bash
 acli jira workitem transition --key "MYPROJECT-733" --status "In Review"
 ```
-
-**Flags:**
-- `--list` - List available transitions for the work item instead of executing one
 
 ### Assign Work Item `!`
 

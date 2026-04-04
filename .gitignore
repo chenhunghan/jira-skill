@@ -1,8 +1,5 @@
 # skill eval workspaces
 *-workspace/
 
-# user-local config (persists across skill updates)
-config.local.json
-
 # OS
 .DS_Store

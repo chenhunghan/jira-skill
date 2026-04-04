@@ -36,17 +36,16 @@ Notes:
 
 ## Configuration
 
-Create a `config.local.json` in the skill directory with your Jira project key:
+Create `~/.config/jira-skill/config.json` with your Jira project key:
 
-```json
-{
-  "defaultProject": "YOUR_PROJECT_KEY"
-}
+```bash
+mkdir -p ~/.config/jira-skill
+echo '{"defaultProject": "YOUR_PROJECT_KEY"}' > ~/.config/jira-skill/config.json
 ```
 
-This file is gitignored and won't be overwritten by `npx skills update`. The shipped `config.json` is a schema reference with a placeholder — don't edit it directly.
+This file lives outside the skill directory, so `npx skills update` will never overwrite it. The shipped `config.json` inside the skill is a schema reference with a placeholder — don't edit it directly.
 
-The skill will ask for your project key on first use if neither config file is configured, and save your answer to `config.local.json`.
+The skill will ask for your project key on first use if no config is found, and save your answer to `~/.config/jira-skill/config.json`.
 
 ## What Makes This Skill Stand Out
 
