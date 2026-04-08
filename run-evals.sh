@@ -107,7 +107,7 @@ $(<"$ref_file")
   done
 fi
 
-SYSTEM_PROMPT="You are evaluating a Jira skill for Claude Code. The skill instructs an AI agent how to manage Jira work items using acli and mdadf.
+SYSTEM_PROMPT_BASE="You are evaluating a Jira skill for Claude Code. The skill instructs an AI agent how to manage Jira work items using acli and mdadf.
 
 Here is the full SKILL.md content the agent would receive:
 
@@ -117,13 +117,14 @@ $SKILL_CONTENT
 ${REFS_CONTENT:+
 The skill also has these reference files available. Use them when SKILL.md tells you to:
 $REFS_CONTENT}
-You are role-playing as the agent that has loaded this skill. When given a user prompt, respond EXACTLY as the agent would: produce the acli commands you would run, explain your reasoning, and follow all rules in the skill. Do NOT actually execute commands. Do NOT use any MCP tools. Just show what you WOULD do.
+You are role-playing as the agent that has loaded this skill. When given a user prompt, respond EXACTLY as the agent would: produce the acli commands you would run, explain your reasoning, and follow all rules in the skill. Do NOT actually execute commands. Do NOT use any MCP tools. Just show what you WOULD do."
 
-For this eval, assume the following environment:
+DEFAULT_ENVIRONMENT="For this eval, assume the following environment:
 - The workspace .jira-skill.json contains: {\"defaultProject\": \"MYPROJECT\"}
 - The project key MYPROJECT is valid and resolved.
-- When the skill says to fetch current state (e.g. view before edit), show the view command you would run, then proceed with the mutation. Do not wait for confirmation — this is a dry run.
+- When the skill says to fetch current state (e.g. view before edit), show the view command you would run, then proceed with the mutation. Do not wait for confirmation — this is a dry run."
 
+SYSTEM_PROMPT_FOOTER="
 IMPORTANT: You must follow every instruction in the skill including Safety Rules, Operating Constraints, and Execution Steps."
 
 echo '{"task_evals":[],"trigger_evals":[]}' > "$RESULTS_FILE"
@@ -138,10 +139,25 @@ for i in $(seq 0 $((EVAL_COUNT - 1))); do
   PROMPT=$(jq -r ".evals[$i].prompt" "$EVALS_FILE")
   EXPECTATIONS=$(jq -r ".evals[$i].expectations[] | \"- \" + ." "$EVALS_FILE")
 
+  # Use per-eval environment override if present, otherwise default
+  EVAL_ENV=$(jq -r ".evals[$i].environment // empty" "$EVALS_FILE")
+  if [ -n "$EVAL_ENV" ]; then
+    EVAL_SYSTEM_PROMPT="$SYSTEM_PROMPT_BASE
+
+For this eval, assume the following environment:
+$EVAL_ENV
+$SYSTEM_PROMPT_FOOTER"
+  else
+    EVAL_SYSTEM_PROMPT="$SYSTEM_PROMPT_BASE
+
+$DEFAULT_ENVIRONMENT
+$SYSTEM_PROMPT_FOOTER"
+  fi
+
   echo ""
   echo "--- Eval #$EVAL_ID: ${PROMPT:0:60}..."
 
-  RESPONSE=$(run_prompt "$MODEL_GENERATE" "$SYSTEM_PROMPT" "$PROMPT") || { echo "  [ERROR] generate failed"; continue; }
+  RESPONSE=$(run_prompt "$MODEL_GENERATE" "$EVAL_SYSTEM_PROMPT" "$PROMPT") || { echo "  [ERROR] generate failed"; continue; }
 
   echo "$RESPONSE" > "$OUT_DIR/eval-${EVAL_ID}-response.txt"
 

@@ -137,11 +137,13 @@
     {
       "id": 13,
       "prompt": "Create a task called 'Refactor auth module'. I haven't configured my project yet.",
-      "expected_output": "Asks the user for their project key and writes the answer to .jira-skill.json or ~/.config/jira-skill/config.json.",
+      "expected_output": "Asks the user for their project key AND where to save it (global vs project-level, defaulting to global), then writes the config after both are answered.",
       "files": [],
+      "environment": "No .jira-skill.json exists in the workspace or any parent directory. No ~/.config/jira-skill/config.json exists either. The user has not provided a project key.",
       "expectations": [
         "Asks the user which project key to use before creating the task.",
-        "Writes the project key to `.jira-skill.json` (workspace) or `~/.config/jira-skill/config.json` (global)."
+        "Asks the user whether to save the config globally (~/.config/jira-skill/config.json) or at project level (.jira-skill.json), recommending global as the default.",
+        "Does NOT write the config until the user confirms both the project key and storage location."
       ]
     },
     {
@@ -161,6 +163,7 @@
       "prompt": "I just switched to a different repo. Create a task called 'Set up CI pipeline'.",
       "expected_output": "Re-resolves the project key from the current working directory instead of reusing a cached value from a previous request.",
       "files": [],
+      "environment": "No .jira-skill.json exists in the current workspace or any parent directory. No ~/.config/jira-skill/config.json exists either. The user has not provided a project key.",
       "expectations": [
         "Does not reuse a project key from a previous request or assume the project is already known.",
         "Searches for `.jira-skill.json` starting from the current working directory.",

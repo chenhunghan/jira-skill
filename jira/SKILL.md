@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, then `.jira-skill.json` (searching up to repo root), then `~/.config/jira-skill/config.json`, then ask the user. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), git branch naming, Confluence, auth setup, REST API scripting, or non-Jira trackers.
+description: Use this skill for Jira work items with Atlassian CLI (`acli`). Trigger it whenever the user mentions Jira, JQL, issue or ticket keys like `ABC-123`, assignees, status changes, comments, rich-text Jira descriptions, or Markdown that needs to become Jira ADF. Resolve the project from an explicit issue key or project key first, then `.jira-skill.json` (searching up to repo root), then `~/.config/jira-skill/config.json`, then STOP and ask the user — never auto-select. Do not use it for GitHub PR edits, repo/codebase searches (even if "jira" appears as a package or library name), git branch naming, Confluence, auth setup, REST API scripting, or non-Jira trackers.
 compatibility: Requires `acli` and `mdadf` CLI. Uses `zsh` or `bash` process substitution for piping ADF into acli flags. On Windows PowerShell, uses temp files instead.
 ---
 
@@ -44,7 +44,9 @@ Resolve the project key on every request — do not cache it across requests, be
 2. If the user explicitly names a project key such as `MYPROJECT`, use that.
 3. Otherwise, search for `.jira-skill.json` starting from the current working directory and walking up parent directories until the repo root (the directory containing `.git`) is reached. If found and it has a valid `defaultProject`, use it.
 4. Otherwise, read `~/.config/jira-skill/config.json`. This is the user-global fallback, shared across all repos.
-5. If no config is found, ask the user which project key to use. Write their answer to `.jira-skill.json` in the repo root (the directory containing `.git`) if inside a repo, or `~/.config/jira-skill/config.json` otherwise.
+5. If no config is found, you MUST stop and ask the user two things before proceeding:
+   - **Which project?** List the available projects (via `acli jira project list --recent`) and ask the user to confirm. Do NOT guess or auto-select a project, even if only one project is returned.
+   - **Where to save?** Ask whether to save the default as a **global** config (`~/.config/jira-skill/config.json`, shared across all repos) or a **project-level** config (`.jira-skill.json` in the repo root). Default recommendation is **global**, since most users work on one project at a time. Only write the config after the user answers both questions. If the user just confirms the project without specifying a storage location, use global.
 
 `.jira-skill.json` is workspace-local — different repos get different defaults. Add it to `.gitignore` if it should not be shared. `~/.config/jira-skill/config.json` is user-global and survives skill updates.
 
