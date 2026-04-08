@@ -349,4 +349,5 @@ acli jira workitem assign --key "MYPROJECT-801" --assignee "alex@example.com"
 
 ## Output Format
 
-When reporting findings, use table format with link to the workitems.
+- **Always include the direct Jira URL** after any create, edit, transition, comment, or assign operation. Parse the URL from the `acli` output (e.g. `✓ Work item MYPROJECT-100 created: https://…/browse/MYPROJECT-100`) and present it as a clickable link. Never report just the issue key without its URL.
+- When reporting search results or findings, use table format with links to the work items.

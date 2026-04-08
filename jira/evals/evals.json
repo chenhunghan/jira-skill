@@ -20,7 +20,8 @@
       "expectations": [
         "Uses `acli jira workitem create` with `--type \"Bug\"` and `--project \"MYPROJECT\"` (or the resolved default).",
         "Uses `--assignee \"@me\"` or an equivalent self-assignment flag.",
-        "Uses `mdadf --compact` with `--description-file` rather than raw Markdown or inline JSON."
+        "Uses `mdadf --compact` with `--description-file` rather than raw Markdown or inline JSON.",
+        "Mentions presenting the direct Jira URL from the acli output after creation, not just the issue key."
       ]
     },
     {
@@ -53,7 +54,8 @@
       "expectations": [
         "Uses `acli jira workitem transition --key \"MYPROJECT-733\" --status \"In Review\"` or an equivalent key-based transition.",
         "Uses `acli jira workitem assign --key \"MYPROJECT-733\" --assignee \"@me\"` or an equivalent self-assignment command.",
-        "Does not use JQL for a single known work item key."
+        "Does not use JQL for a single known work item key.",
+        "Mentions presenting the direct Jira URL for the work item after the operations complete."
       ]
     },
     {
