@@ -18,10 +18,15 @@ npx skills add chenhunghan/jira-skill
 
 Requires [`acli`](https://developer.atlassian.com/cloud/acli/guides/install-acli/) and [`mdadf`](https://github.com/chenhunghan/mdadf) — the skill will check for both on first run.
 
-(Optional) To pre-configure your project, create `.jira-skill.json` in your repo:
+On first use the skill asks which Jira project to use and where to save the config — no manual setup needed. If you prefer to pre-configure:
 
-```json
-{ "defaultProject": "YOUR_PROJECT_KEY" }
+```sh
+# Global — shared across all repos (recommended for most users)
+mkdir -p ~/.config/jira-skill
+echo '{ "defaultProject": "YOUR_PROJECT_KEY" }' > ~/.config/jira-skill/config.json
+
+# Per-repo — overrides the global config for this repo only
+echo '{ "defaultProject": "YOUR_PROJECT_KEY" }' > .jira-skill.json
 ```
 
 
