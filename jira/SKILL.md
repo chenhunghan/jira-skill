@@ -21,7 +21,7 @@ If either tool is missing and cannot be installed (e.g. no network access), tell
 
 - **READ-ONLY for Projects**: Never modify Jira projects themselves. Only create, update, or delete work items within projects.
 - **Mutation Intent**: For create, edit, transition, assign, comment, or delete operations, only mutate Jira when the user explicitly asks for that change. If the request is ambiguous, clarify before mutating.
-- **Key-First Targeting**: If the user provides a work item key such as `MYPROJECT-1455`, prefer key-based commands over JQL.
+- **Key-First Targeting**: If the user provides a work item key such as `MYPROJECT-1455`, use it directly rather than writing JQL. The exact CLI syntax varies per subcommand (`view` uses a positional argument; `edit`, `transition`, `assign`, and `comment` use a `--key` flag) — see [references/commands.md](references/commands.md).
 - **JQL**: Use `--jql` for selecting, searching, or filtering work items when applicable.
 - **Configured Default Project**: If the user does not specify a project, resolve via the Project Resolution chain below (workspace `.jira-skill.json` → user-global `~/.config/jira-skill/config.json` → ask user).
 - **Work Item Types**: `Bug`, `Task`, `Story`, `Epic`
@@ -81,7 +81,7 @@ These rules prevent common Jira mishaps. Follow them without exception.
 
 1. If the request is mutating, review the Safety Rules above. Identify which rules apply before running any command.
 2. Resolve the project key using the project resolution rules above.
-3. If the request targets a specific work item key, use a key-based command. Use JQL only when searching or targeting multiple work items.
+3. If the request targets a specific work item key, use it directly rather than JQL. Consult [references/commands.md](references/commands.md) for whether the subcommand takes the key as a positional argument or a `--key` flag. Use JQL only when searching or targeting multiple work items.
 4. If the request needs rich text, write the content in Markdown and convert it to ADF with `mdadf --compact` before running `acli`. Read [references/mdadf-usage.md](references/mdadf-usage.md) if you need platform-specific syntax.
 5. If creating or rewriting a work item, follow the drafting format in [references/ticket-drafting.md](references/ticket-drafting.md).
 6. Run the appropriate `acli` command. Read [references/commands.md](references/commands.md) for the full flag reference.

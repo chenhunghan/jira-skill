@@ -9,17 +9,25 @@ set -euo pipefail
 #   bash run-evals.sh --trigger 5           # single trigger eval by index (0-based)
 #   CLI=codex bash run-evals.sh             # force codex backend
 #   CLI=claude bash run-evals.sh            # force claude backend
+#   bash run-evals.sh --no-refs --task 1    # run without reference files
 
 RUN_TASKS=true
 RUN_TRIGGERS=true
 SINGLE_TASK=""
 SINGLE_TRIGGER=""
-case "${1:-}" in
-  --triggers-only) RUN_TASKS=false ;;
-  --tasks-only) RUN_TRIGGERS=false ;;
-  --task) RUN_TRIGGERS=false; SINGLE_TASK="${2:?missing eval id}" ;;
-  --trigger) RUN_TASKS=false; SINGLE_TRIGGER="${2:?missing trigger index}" ;;
-esac
+INCLUDE_REFS=true
+
+# Parse flags (order-independent)
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --triggers-only) RUN_TASKS=false; shift ;;
+    --tasks-only) RUN_TRIGGERS=false; shift ;;
+    --task) RUN_TRIGGERS=false; SINGLE_TASK="${2:?missing eval id}"; shift 2 ;;
+    --trigger) RUN_TASKS=false; SINGLE_TRIGGER="${2:?missing trigger index}"; shift 2 ;;
+    --no-refs) INCLUDE_REFS=false; shift ;;
+    *) echo "Unknown flag: $1" >&2; exit 1 ;;
+  esac
+done
 
 # Auto-detect CLI backend
 if [ -z "${CLI:-}" ]; then
@@ -93,10 +101,10 @@ mkdir -p "$OUT_DIR"
 
 SKILL_CONTENT=$(<"$SKILL_FILE")
 
-# Load reference files if they exist
+# Load reference files if they exist and --no-refs was not passed
 REFS_CONTENT=""
 REFS_DIR="jira/references"
-if [ -d "$REFS_DIR" ]; then
+if [ "$INCLUDE_REFS" = true ] && [ -d "$REFS_DIR" ]; then
   for ref_file in "$REFS_DIR"/*.md; do
     [ -f "$ref_file" ] || continue
     REFS_CONTENT+="

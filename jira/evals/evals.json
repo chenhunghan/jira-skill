@@ -8,6 +8,7 @@
       "files": [],
       "expectations": [
         "Uses `acli jira workitem view MYPROJECT-1455` rather than a JQL search.",
+        "Does NOT use a `--key` flag with the `view` subcommand — the key must be a positional argument.",
         "Uses a focused fields selection such as `summary,comment` instead of default broad output.",
         "Does not propose or run a mutating Jira command."
       ]
@@ -99,6 +100,7 @@
       "files": [],
       "expectations": [
         "Runs `acli jira workitem view MYPROJECT-500` (or equivalent status check) BEFORE the transition command.",
+        "The view/status-check command uses the key as a positional argument, NOT as a `--key` flag.",
         "Uses `acli jira workitem transition --key \"MYPROJECT-500\" --status \"Done\"` or equivalent.",
         "Does not blindly transition without verifying current state."
       ]
@@ -110,6 +112,7 @@
       "files": [],
       "expectations": [
         "Shows an `acli jira workitem view MYPROJECT-200` command (or equivalent) BEFORE the edit command.",
+        "The view command uses the key as a positional argument (`acli jira workitem view MYPROJECT-200`), NOT a `--key` flag.",
         "Uses `acli jira workitem edit --key \"MYPROJECT-200\"` with `--description-file` and `mdadf --compact`.",
         "The view command appears before the edit command in the response, not after."
       ]
@@ -170,6 +173,17 @@
         "Does not reuse a project key from a previous request or assume the project is already known.",
         "Searches for `.jira-skill.json` starting from the current working directory.",
         "If no config is found, asks the user which project key to use."
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Show me the current status of MYPROJECT-300 and then reassign it to alex@example.com.",
+      "expected_output": "Uses positional key for view and --key flag for assign, demonstrating correct per-subcommand syntax.",
+      "files": [],
+      "expectations": [
+        "Uses `acli jira workitem view MYPROJECT-300` with the key as a positional argument, NOT a `--key` flag.",
+        "Uses `acli jira workitem assign --key \"MYPROJECT-300\"` with the `--key` flag.",
+        "Both commands target MYPROJECT-300 without falling back to JQL."
       ]
     }
   ]

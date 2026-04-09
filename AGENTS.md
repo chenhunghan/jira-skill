@@ -2,7 +2,7 @@
 
 ## Verify changes
 
-After editing `jira/SKILL.md`, run the eval suite to check for regressions.
+After editing `jira/SKILL.md`, run the eval suite to check for regressions. **Only run the evals affected by your change** — evals are slow (each one calls an LLM twice). Run the full suite only when the user explicitly asks for it.
 
 ### Structural check (requires `jq`)
 
