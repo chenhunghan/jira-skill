@@ -1,14 +1,14 @@
 # jira-skill
 
+The only CLI first, markdown first, the most token efficient Jira skill. 
+
 An [Agent Skill](https://agentskills.io) for managing Jira work items with [Atlassian CLI (`acli`)](https://developer.atlassian.com/cloud/acli/) and [`mdadf`](https://github.com/chenhunghan/mdadf) for Markdown-to-ADF conversion.
 
 ## What it does
 
-- **View, create, edit, search, transition, assign, and comment** on Jira work items using Atlassian's own CLI ([`acli`](https://developer.atlassian.com/cloud/acli/guides/install-acli/))
+- **Zero setup** — asks for your project name on first use. No Python, no Docker, no config files required.
 - **Rich text that works** — write Markdown, get proper Jira formatting via [`mdadf`](https://github.com/chenhunghan/mdadf). No raw JSON or plain text.
-- **Safe by default** — won't modify Jira unless you ask. Shows current state before edits. Checks status before transitions.
-- **Zero setup** — asks for your project key on first use. No Python, no Docker, no config files required.
-- **Cross-platform** — macOS, Linux, and Windows PowerShell
+- **View, create, edit, search, transition, assign, and comment**
 
 ## Install
 
