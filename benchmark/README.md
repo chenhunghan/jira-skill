@@ -38,15 +38,15 @@ For developers pointing an agent at Jira as execution context, the full loop mat
 | 0 | Session start | 1,932 | 7,421 |
 | 1 | Fetch ticket body | 1,022 | 1,865 |
 | 2 | List related tickets | 618 | 10,032 |
-| 3 | Transition To Do → In Progress | 50 | 200 |
-| 4 | Comment: "starting work" | 100 | 400 |
-| 5 | Transition In Progress → In Review | 50 | 200 |
-| 6 | Comment with PR link | 100 | 400 |
-| | **Total per loop** | **3,872** | **20,518** |
+| 3 | Transition To Do → In Progress | 30 | 130 |
+| 4 | Comment: "starting work" | 55 | 710 |
+| 5 | Transition In Progress → In Review | 30 | 130 |
+| 6 | Comment with PR link | 55 | 710 |
+| | **Total per loop** | **3,742** | **20,998** |
 
-**~81% fewer tokens per dev loop (~5.3× lighter). At a 200K context window, `jira-skill` fits ~51 complete loops per session vs MCP's ~9 — ~5.7× more dev cycles before context pressure kicks in.**
+**~82% fewer tokens per dev loop (~5.6× lighter). At a 200K context window, `jira-skill` fits ~53 complete loops per session vs MCP's ~9 — ~5.9× more dev cycles before context pressure kicks in.**
 
-Steps 0-2 are measured per-op benchmarks; 3-6 are conservative estimates (no live mutations performed). Reasoning tokens between tool calls aren't counted, so the real gap is likely larger. Run `bash benchmark/bench.sh measure-loop` to recompute with your own numbers.
+Steps 0-2 are measured per-op benchmarks; steps 3-6 are derived from committed fixtures (comment-object size pulled from the barebones fixture) and from `acli`/MCP tool-call shapes — no live mutations performed. Reasoning tokens between tool calls aren't counted, so the real gap is likely larger. Run `bash benchmark/bench.sh measure-loop` to recompute with your own numbers.
 
 ## Why the gap is this wide
 

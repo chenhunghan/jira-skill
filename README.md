@@ -20,7 +20,7 @@ Top wins per operation:
 - Session startup: **74%** fewer
 - Rich-markdown creates: **74%** fewer
 
-**Agent-loop (ship a ticket end-to-end)**: **~81% fewer tokens per dev cycle (~5.3×)** — fits **~5× more complete cycles** in one 200K-token session.
+**Agent-loop (ship a ticket end-to-end)**: **~82% fewer tokens per dev cycle (~5.6×)** — fits **~6× more complete cycles** in one 200K-token session.
 
 Full numbers, methodology, and cost translation: [`benchmark/README.md`](./benchmark/README.md).
 
