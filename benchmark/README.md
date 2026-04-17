@@ -44,7 +44,7 @@ For developers pointing an agent at Jira as execution context, the full loop mat
 | 6 | Comment with PR link | 100 | 400 |
 | | **Total per loop** | **3,872** | **20,518** |
 
-**~5.3× fewer tokens per dev loop. At a 200K context window, `jira-skill` fits ~51 complete loops per session vs MCP's ~9 — 5.7× more dev cycles before context pressure kicks in.**
+**~81% fewer tokens per dev loop (~5.3× lighter). At a 200K context window, `jira-skill` fits ~51 complete loops per session vs MCP's ~9 — ~5.7× more dev cycles before context pressure kicks in.**
 
 Steps 0-2 are measured per-op benchmarks; 3-6 are conservative estimates (no live mutations performed). Reasoning tokens between tool calls aren't counted, so the real gap is likely larger. Run `bash benchmark/bench.sh measure-loop` to recompute with your own numbers.
 

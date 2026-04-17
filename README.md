@@ -16,12 +16,11 @@ Saves **~80%** of Jira-related tokens on everyday tasks — more context room fo
 
 Top wins per operation:
 
-- Viewing an empty ticket: **99.7%** fewer tokens — MCP ships ~10 KB of metadata even for empty tickets
-- Listing tickets: **94%** fewer
+- Listing tickets: **94%** fewer tokens
 - Session startup: **74%** fewer
 - Rich-markdown creates: **74%** fewer
 
-**End-to-end dev loop** ("ship a ticket": fetch → list context → transition → comment → open PR → link back): **~5× fewer tokens per loop**. At a 200K context window, `jira-skill` fits **~5× more complete dev cycles per session** before the agent starts degrading under context pressure.
+**Agent-loop (ship a ticket end-to-end)**: **~81% fewer tokens per dev cycle (~5.3×)** — fits **~5× more complete cycles** in one 200K-token session.
 
 Full numbers, methodology, and cost translation: [`benchmark/README.md`](./benchmark/README.md).
 
