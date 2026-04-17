@@ -37,7 +37,7 @@ Write tasks synthesized (no Jira side effects) to measure the input payload each
 | `create-short` | `acli jira workitem create ... --description-file <(mdadf --compact <<MD ... MD)` | `createJiraIssue` with ADF (default) or markdown (opt-in via `contentFormat`) |
 | `create-rich` | same, richer markdown body | same |
 
-Fixed-overhead: `measure-overhead` compares `jira/SKILL.md` (+ on-demand references) against the full 31-tool Atlassian MCP schema dump.
+Fixed-overhead: `measure-overhead` compares `jira/SKILL.md` (+ on-demand references) against the full 31-tool Atlassian MCP schema dump. Read the startup number as a range rather than a single constant: the skill has an initial cost (`SKILL.md` only) and a higher upper bound (`SKILL.md` + all references), while MCP can be measured either as the full server or a Jira-focused subset.
 
 Agent-loop (scripted scenario, not captured):
 
@@ -132,4 +132,5 @@ benchmark/
 - Token counts are approximate (chars / 4). Wire `count_tokens` for exactness — ratios will shift by a few percent, not materially.
 - Full agent-loop cost (reasoning + multi-turn + final answer) not yet measured; the gap there is expected to be smaller than the payload gap because both arms produce similar final answers.
 - Output tokens on read tasks not measured. Since the MCP arm has more to digest, the model sometimes writes longer summaries, so the gap on totals is probably slightly larger than what's shown.
+- Search scaling beyond the captured 1-result and 5-result fixtures is not directly measured yet. Any statement about 10-, 20-, or 100-result searches should be presented as an inference from the repeated per-issue metadata, not as a benchmarked fact.
 - Daily-workload projection assumes 1 session + 10 views + 5 JQL searches + 3 rich creates per workday. Scale linearly for your own usage patterns.

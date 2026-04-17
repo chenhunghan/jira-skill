@@ -6,7 +6,7 @@ Using `jira-skill` instead of the [Atlassian MCP server](https://support.atlassi
 
 | What you're doing | `jira-skill` | Atlassian MCP | You save |
 |---|---:|---:|---:|
-| Starting a session (capability loaded in context) | 1,932 tok | 7,421 tok | **74%** |
+| Starting a session (SKILL.md only vs full 31-tool MCP) | 1,932 tok | 7,421 tok | **74%** |
 | Viewing one ticket (~4 KB description) | 1,022 tok | 1,865 tok | **45%** |
 | Viewing a barebones ticket (empty description) | 32 tok | 10,046 tok | **99.7%** |
 | Listing your 5 most recent tickets (default fields) | 618 tok | 10,032 tok | **94%** |
@@ -16,6 +16,8 @@ Using `jira-skill` instead of the [Atlassian MCP server](https://support.atlassi
 The **barebones** row is the ceiling: even with no description and no comments, MCP ships custom-field metadata, parent expansion, and every field's `self` + avatar URLs — ~10 KB of boilerplate. `acli` shows Key / Type / Summary / Status / Assignee in 127 bytes.
 
 The **projected-listing** row is the *best case for MCP* — when the caller explicitly sets `fields: [...]`. Even then, per-field `self` URLs and nested metadata leave MCP at ~3.7× the skill.
+
+Startup is a range, not a single constant. `jira-skill` starts at **1,932 tok** for `SKILL.md` alone and rises to **5,086 tok** if every reference page is loaded. Atlassian MCP is **3,950 tok** for the Jira-focused subset and **7,421 tok** for the full 31-tool server. The per-day totals below use the default comparison shown in the table; the read-path measurements dominate the overall savings either way.
 
 Numbers are per operation, from real sanitized fixtures in this repo.
 
@@ -50,7 +52,7 @@ Steps 0-2 are measured per-op benchmarks; steps 3-6 are derived from committed f
 
 ## Why the gap is this wide
 
-- **Reads.** Every MCP response embeds ~7 KB of metadata per issue — self-URLs, 4-size avatar URLs, cloudId-laden links, every custom-field slot — regardless of how small the issue is. That overhead compounds linearly: 1 issue is bad, 10 issues is dire, and an empty issue is absurd. `acli` returns a flat table that stays ~4 KB whether you pull 1 row or 100.
+- **Reads.** Every MCP response embeds repeated per-issue metadata — self-URLs, 4-size avatar URLs, cloudId-laden links, and custom-field slots — regardless of how small the issue is. In the committed fixtures, `acli` stays around **~4 KB** for both a single-issue view (**4,090 bytes**) and a 5-result search (**4,052 bytes**), while MCP grows from **7,459 bytes** for one issue to **40,130 bytes** for five issues. We have not benchmarked 100-result searches yet; the claim here is the measured 1-to-5 result spread plus the repeated metadata visible in the fixtures.
 - **Writes.** MCP defaults to Atlassian Document Format (ADF) for descriptions, so the agent has to emit verbose structural JSON for every heading, table, code block, and link. `jira-skill` pipes markdown through `mdadf --compact` in a subprocess, so the agent only ever emits raw markdown — regardless of how rich the body is.
 - **Startup.** Enabling Atlassian's MCP loads **31 tool schemas** (Jira + Confluence) into context before you do anything. `jira-skill` is one `SKILL.md` file; reference pages load only when the agent needs them.
 
