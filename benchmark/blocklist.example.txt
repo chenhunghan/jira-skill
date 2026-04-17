@@ -1,0 +1,29 @@
+# Token-efficiency benchmark — blocklist template.
+#
+# Copy this file to blocklist.txt (which is gitignored) and fill in
+# substrings that must NEVER appear in a committed fixture. The verify
+# step (verify.sh) fails if any match — case-insensitive, substring.
+#
+# Without a local blocklist.txt, the sanitize and verify steps will
+# refuse to run (see bench.sh).
+#
+# Add at least:
+#   - your company / org name and any product codenames
+#   - the email domain(s) you use
+#   - your Atlassian cloudId (UUID)
+#   - your Atlassian accountId (24-char hex)
+#   - your display name and handles
+#   - every internal Jira project key (e.g. ABC, XYZ)
+#   - any customer or partner name that appears in issue content
+#
+# Example (replace with your own — do NOT commit these):
+#
+#   example-company
+#   @example-company.com
+#   00000000-0000-0000-0000-000000000000
+#   000000000000000000000000
+#   Firstname Lastname
+#   flastname
+#   PROJ
+#   PRODUCTCODENAME
+#   customer-name

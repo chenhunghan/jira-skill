@@ -1,0 +1,20 @@
+{
+  "id": "view-small-issue",
+  "description": "View a single small Jira issue using the natural defaults of each arm (no --fields projection).",
+  "prompt": "Show me issue {{issueKey}}.",
+  "fixtureIssueKey": "BENCH-1",
+  "skill": {
+    "command": "acli jira workitem view {{issueKey}}",
+    "note": "Default fields per jira/references/commands.md: key,issuetype,summary,status,assignee,description"
+  },
+  "mcp": {
+    "tool": "mcp__claude_ai_Atlassian__getJiraIssue",
+    "args": {
+      "issueIdOrKey": "{{issueKey}}"
+    },
+    "note": "No fields projection; default response includes full ADF description and all system fields."
+  },
+  "expected": {
+    "mustMentionFields": ["summary", "status", "type"]
+  }
+}

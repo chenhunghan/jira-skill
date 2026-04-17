@@ -1,0 +1,8 @@
+capture/
+results/
+__pycache__/
+*.pyc
+
+# Local blocklist — contains real company/PII substrings; never commit.
+# Users copy blocklist.example.txt → blocklist.txt and fill it in.
+blocklist.txt
