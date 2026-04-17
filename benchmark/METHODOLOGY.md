@@ -39,6 +39,12 @@ Write tasks synthesized (no Jira side effects) to measure the input payload each
 
 Fixed-overhead: `measure-overhead` compares `jira/SKILL.md` (+ on-demand references) against the full 31-tool Atlassian MCP schema dump.
 
+Agent-loop (scripted scenario, not captured):
+
+| task | scenario |
+|---|---|
+| `ship-ticket` | Sum of a 7-step canonical dev loop: session start + fetch ticket + list related + 2× transition + 2× comment. Steps 0-2 reuse measured per-op numbers; 3-6 use conservative estimates (no Jira mutations performed). The scenario JSON is swappable — refine the estimates with your own measurements and the totals recompute. |
+
 Read tasks use each arm's natural defaults — no `--fields` projection, no `responseContentFormat` override.
 
 ## Data handling
@@ -97,6 +103,9 @@ bash benchmark/bench.sh measure-create create-rich
 
 # fixed overhead:
 bash benchmark/bench.sh measure-overhead
+
+# end-to-end agent loop (scripted sum; reads from tasks/ship-ticket.json):
+bash benchmark/bench.sh measure-loop ship-ticket
 ```
 
 ## Layout

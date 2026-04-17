@@ -122,6 +122,12 @@ case "$cmd" in
     python3 "$HERE/measure_overhead.py"
     ;;
 
+  measure-loop)
+    task="${1:-ship-ticket}"
+    command -v python3 >/dev/null || die "python3 required"
+    python3 "$HERE/measure_agent_loop.py" --task "$task"
+    ;;
+
   *)
     cat <<EOF
 usage: bench.sh <command>
@@ -135,6 +141,8 @@ commands:
   measure-create <TASK>         print 3-arm table (skill / mcp-adf / mcp-md)
   measure-overhead              compare fixed per-session overhead
                                 (SKILL.md + refs vs MCP tool schemas)
+  measure-loop [TASK]           end-to-end agent-loop scenario
+                                (default TASK: ship-ticket)
 
 tasks:
   small-issue <KEY>             view a medium issue (KEY required)

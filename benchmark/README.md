@@ -29,6 +29,25 @@ Realistic daily workload: 1 session + 10 ticket views + 5 JQL searches + 3 issue
 | Atlassian MCP (default) | ~79,000 |
 | **Difference** | **~63,000 fewer (~80%)** |
 
+## End-to-end: shipping a ticket
+
+For developers pointing an agent at Jira as execution context, the full loop matters more than any single op. Canonical dev cycle — agent reads the ticket, pulls related context, marks in-progress, comments, opens a PR, links it back:
+
+| # | Step | `jira-skill` | MCP |
+|---|---|---:|---:|
+| 0 | Session start | 1,932 | 7,421 |
+| 1 | Fetch ticket body | 1,022 | 1,865 |
+| 2 | List related tickets | 618 | 10,032 |
+| 3 | Transition To Do → In Progress | 50 | 200 |
+| 4 | Comment: "starting work" | 100 | 400 |
+| 5 | Transition In Progress → In Review | 50 | 200 |
+| 6 | Comment with PR link | 100 | 400 |
+| | **Total per loop** | **3,872** | **20,518** |
+
+**~5.3× fewer tokens per dev loop. At a 200K context window, `jira-skill` fits ~51 complete loops per session vs MCP's ~9 — 5.7× more dev cycles before context pressure kicks in.**
+
+Steps 0-2 are measured per-op benchmarks; 3-6 are conservative estimates (no live mutations performed). Reasoning tokens between tool calls aren't counted, so the real gap is likely larger. Run `bash benchmark/bench.sh measure-loop` to recompute with your own numbers.
+
 ## Why the gap is this wide
 
 - **Reads.** Every MCP response embeds ~7 KB of metadata per issue — self-URLs, 4-size avatar URLs, cloudId-laden links, every custom-field slot — regardless of how small the issue is. That overhead compounds linearly: 1 issue is bad, 10 issues is dire, and an empty issue is absurd. `acli` returns a flat table that stays ~4 KB whether you pull 1 row or 100.

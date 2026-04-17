@@ -21,6 +21,8 @@ Top wins per operation:
 - Session startup: **74%** fewer
 - Rich-markdown creates: **74%** fewer
 
+**End-to-end dev loop** ("ship a ticket": fetch → list context → transition → comment → open PR → link back): **~5× fewer tokens per loop**. At a 200K context window, `jira-skill` fits **~5× more complete dev cycles per session** before the agent starts degrading under context pressure.
+
 Full numbers, methodology, and cost translation: [`benchmark/README.md`](./benchmark/README.md).
 
 ## Install

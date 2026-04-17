@@ -1,0 +1,61 @@
+{
+  "id": "ship-ticket",
+  "description": "End-to-end agent loop: an AI coding agent picks up a Jira ticket, uses Jira as execution context, implements it, and opens a PR linked back to the ticket. The coding and PR-creation themselves are outside Jira — same cost both arms, omitted here. Steps 0-2 use measured per-op benchmarks; steps 3-6 use conservative estimates (no Jira mutations performed). Every step is a standalone number — swap in your own measurements to refine.",
+  "scenario": "Agent receives: 'Work on BENCH-1 and open a PR linked to it.' The Jira interactions that make up the loop:",
+  "steps": [
+    {
+      "step": 0,
+      "label": "Session start",
+      "source": "measured: measure-overhead",
+      "skill_tokens": 1932,
+      "mcp_tokens": 7421
+    },
+    {
+      "step": 1,
+      "label": "Fetch ticket body (plan from description)",
+      "source": "measured: small-issue",
+      "skill_tokens": 1022,
+      "mcp_tokens": 1865
+    },
+    {
+      "step": 2,
+      "label": "List related assigned tickets (context for blockers)",
+      "source": "measured: recent-assigned",
+      "skill_tokens": 618,
+      "mcp_tokens": 10032
+    },
+    {
+      "step": 3,
+      "label": "Transition To Do -> In Progress",
+      "source": "estimate (small write: bash command vs tool-call envelope)",
+      "skill_tokens": 50,
+      "mcp_tokens": 200
+    },
+    {
+      "step": 4,
+      "label": "Comment: 'starting work'",
+      "source": "estimate (create-short input + short response)",
+      "skill_tokens": 100,
+      "mcp_tokens": 400
+    },
+    {
+      "step": 5,
+      "label": "Transition In Progress -> In Review",
+      "source": "estimate (small write)",
+      "skill_tokens": 50,
+      "mcp_tokens": 200
+    },
+    {
+      "step": 6,
+      "label": "Comment with PR link",
+      "source": "estimate (short markdown comment + response)",
+      "skill_tokens": 100,
+      "mcp_tokens": 400
+    }
+  ],
+  "notes": [
+    "Estimates for steps 3-6 are conservative; MCP may be higher in practice because addCommentToJiraIssue can return the created comment object with full metadata.",
+    "An 'MCP-optimized' variant where the agent always sets contentFormat: markdown + fields projection would narrow the ratio to ~3x on writes, but the read-path gap (step 2, 10 KB per search) doesn't close.",
+    "Reasoning tokens between tool calls are not counted; they scale roughly with tool-result size, so the true end-to-end gap is likely a bit larger."
+  ]
+}
