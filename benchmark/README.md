@@ -84,3 +84,6 @@ Create tasks produce **3 arms** per variant:
 - `mcp-md` — MCP `createJiraIssue` with `contentFormat: "markdown"` opt-in. Agent emits markdown.
 
 Read tasks use natural defaults (no `--fields` projection). A projected variant can be added later.
+
+Fixed overhead (no per-task capture — measures the session-startup context cost):
+- `measure-overhead` — compares `jira/SKILL.md` (+ optional references) against the full Atlassian MCP tool-schema dump. Also reports a Jira-focused MCP subset for an apples-to-apples baseline. Skill uses progressive disclosure for references, so its typical overhead sits between initial (SKILL.md only) and max (SKILL.md + all refs).

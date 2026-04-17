@@ -112,6 +112,11 @@ case "$cmd" in
     python3 "$HERE/measure_create.py" --task "$task" "$skill" "$mcp_adf" "$mcp_md"
     ;;
 
+  measure-overhead)
+    command -v python3 >/dev/null || die "python3 required"
+    python3 "$HERE/measure_overhead.py"
+    ;;
+
   *)
     cat <<EOF
 usage: bench.sh <command>
@@ -123,6 +128,8 @@ commands:
   measure <TASK>                compute bytes + approx tokens (2-arm)
   synthesize-create <TASK>      input-only: generate fixtures from tasks/*.md
   measure-create <TASK>         print 3-arm table (skill / mcp-adf / mcp-md)
+  measure-overhead              compare fixed per-session overhead
+                                (SKILL.md + refs vs MCP tool schemas)
 
 tasks:
   small-issue <KEY>             view a single issue (KEY required)
