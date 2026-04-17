@@ -12,7 +12,7 @@ An [Agent Skill](https://agentskills.io) for managing Jira work items with [Atla
 
 ## vs Atlassian MCP
 
-Saves **~80%** of Jira-related tokens on everyday tasks — more context room for actual work, fewer rate-limit hits, lower API cost.
+Saves **~80%** of Jira-related tokens on everyday tasks — more context room for actual work.
 
 Top wins per operation:
 
