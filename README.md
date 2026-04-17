@@ -10,6 +10,18 @@ An [Agent Skill](https://agentskills.io) for managing Jira work items with [Atla
 - **Rich text that works** — write Markdown, get proper Jira formatting via [`mdadf`](https://github.com/chenhunghan/mdadf). No raw JSON or plain text.
 - **View, create, edit, search, transition, assign, and comment**
 
+## vs Atlassian MCP
+
+Saves **~80%** of Jira-related tokens on everyday tasks — more context room for actual work, fewer rate-limit hits, lower API cost.
+
+Top wins per operation:
+
+- Listing tickets: **94%** fewer tokens
+- Session startup: **74%** fewer
+- Rich-markdown creates: **74%** fewer
+
+Full numbers, methodology, and cost translation: [`benchmark/README.md`](./benchmark/README.md).
+
 ## Install
 
 ```sh
