@@ -9,10 +9,14 @@
 #   sanitize <TASK>                    capture/<TASK>.* → fixtures/<TASK>.*
 #   verify                             grep fixtures/ against blocklist.txt
 #   measure <TASK>                     print bytes + approx tokens
+#   synthesize-create <TASK>           input-only: generate fixtures from tasks/*.md
+#   measure-create <TASK>              print 3-arm table (skill / mcp-adf / mcp-md)
 #
 # Tasks:
 #   small-issue <KEY>     view a single issue (KEY required)
 #   recent-assigned       list 5 most recent issues assigned to current user
+#   create-short          input-only: create with short markdown body
+#   create-rich           input-only: create with rich markdown body
 
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -88,6 +92,26 @@ case "$cmd" in
     python3 "$HERE/measure.py" --task "$task" "$skill" "$mcp"
     ;;
 
+  synthesize-create)
+    task="${1:-}"; [[ -n "$task" ]] || die "usage: bench.sh synthesize-create <TASK>"
+    command -v python3 >/dev/null || die "python3 required"
+    command -v mdadf >/dev/null || die "mdadf not installed"
+    mkdir -p "$HERE/fixtures"
+    python3 "$HERE/synthesize_create.py" --task "$task"
+    ;;
+
+  measure-create)
+    task="${1:-}"; [[ -n "$task" ]] || die "usage: bench.sh measure-create <TASK>"
+    command -v python3 >/dev/null || die "python3 required"
+    skill="$HERE/fixtures/skill-$task.txt"
+    mcp_adf="$HERE/fixtures/mcp-adf-$task.json"
+    mcp_md="$HERE/fixtures/mcp-md-$task.json"
+    for f in "$skill" "$mcp_adf" "$mcp_md"; do
+      [[ -f "$f" ]] || die "missing $f; run: bench.sh synthesize-create $task"
+    done
+    python3 "$HERE/measure_create.py" --task "$task" "$skill" "$mcp_adf" "$mcp_md"
+    ;;
+
   *)
     cat <<EOF
 usage: bench.sh <command>
@@ -96,11 +120,15 @@ commands:
   capture-skill <TASK> [args]   run the skill arm; save to capture/ (gitignored)
   sanitize <TASK>               capture/ → fixtures/ (committable)
   verify                        grep fixtures/ against blocklist.txt
-  measure <TASK>                compute bytes + approx tokens for fixtures/
+  measure <TASK>                compute bytes + approx tokens (2-arm)
+  synthesize-create <TASK>      input-only: generate fixtures from tasks/*.md
+  measure-create <TASK>         print 3-arm table (skill / mcp-adf / mcp-md)
 
 tasks:
   small-issue <KEY>             view a single issue (KEY required)
   recent-assigned               list 5 most recent assigned to current user
+  create-short                  input-only: create issue with short markdown
+  create-rich                   input-only: create issue with rich markdown
 EOF
     exit 2
     ;;

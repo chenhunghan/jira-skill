@@ -1,0 +1,30 @@
+## Symptom
+
+Intermittent 500 errors from the profile update endpoint after enabling the new validation middleware in the 1.42 release.
+
+Example response:
+
+```
+POST /api/v2/users/me
+HTTP/1.1 500
+{"error": "middleware_panic", "field": "email"}
+```
+
+## Root Cause
+
+The validation middleware assumes the body has already been parsed as JSON, but the 1.42 route handler passes a raw stream.
+
+| Version | Body parser | Status |
+| --- | --- | --- |
+| 1.41 | `express.json()` | works |
+| 1.42 | stream passthrough | panics |
+
+## Proposed Fix
+
+Wrap the middleware's body access in a `try` / `catch` and return a **400** on parse failure. See the [handler pattern docs](https://example.com/docs/middleware) for the recommended structure.
+
+### Follow-ups
+
+* Add a unit test covering the raw-stream path.
+* Update the changelog to flag the 1.42 regression.
+* Backport the fix to `release/1.42.x`.

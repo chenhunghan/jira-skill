@@ -1,0 +1,16 @@
+{
+  "id": "create-short",
+  "description": "Create a Jira issue with a short markdown body (heading + 2 bullets). Input-only — measures what the agent emits on the tool call; no Jira mutation.",
+  "markdownFile": "create-short.md",
+  "fields": {
+    "projectKey": "BENCH",
+    "issueTypeName": "Bug",
+    "summary": "Settings profile Save button returns HTTP 500"
+  },
+  "cloudId": "00000000-0000-0000-0000-000000000000",
+  "arms": {
+    "skill": "bash acli command with markdown inlined via <(mdadf --compact <<'MD' ... MD)",
+    "mcp-adf": "createJiraIssue tool call with description as stringified ADF (default contentFormat)",
+    "mcp-md": "createJiraIssue tool call with description as markdown + contentFormat='markdown'"
+  }
+}

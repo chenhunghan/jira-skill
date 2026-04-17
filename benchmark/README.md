@@ -70,7 +70,17 @@ benchmark/
 
 ## Tasks
 
+Read (captured from real Jira, sanitized):
 - `small-issue` — view one issue via `acli jira workitem view <KEY>` vs MCP `getJiraIssue`.
 - `recent-assigned` — list 5 issues via `acli jira workitem search --jql ... --limit 5` vs MCP `searchJiraIssuesUsingJql` with `maxResults: 5`.
 
-Both arms use natural defaults (no `--fields` projection). A projected variant can be added later to isolate what projection buys you.
+Write (input-only synthesis — no Jira side effects):
+- `create-short` — create issue with short markdown body (heading + 2 bullets).
+- `create-rich` — create issue with rich markdown body (headings, code block, table, link, bullets).
+
+Create tasks produce **3 arms** per variant:
+- `skill` — bash `acli jira workitem create ... --description-file <(mdadf --compact <<MD ... MD)`. Agent types markdown; mdadf converts subprocess-side.
+- `mcp-adf` — MCP `createJiraIssue` default (contentFormat defaults to ADF). Agent must emit stringified ADF as `description`.
+- `mcp-md` — MCP `createJiraIssue` with `contentFormat: "markdown"` opt-in. Agent emits markdown.
+
+Read tasks use natural defaults (no `--fields` projection). A projected variant can be added later.

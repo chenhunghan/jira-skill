@@ -1,0 +1,16 @@
+{
+  "id": "create-rich",
+  "description": "Create a Jira issue with a rich markdown body (headings, code block, table, link, bullets, inline code). Input-only — measures what the agent emits; no Jira mutation.",
+  "markdownFile": "create-rich.md",
+  "fields": {
+    "projectKey": "BENCH",
+    "issueTypeName": "Bug",
+    "summary": "Profile update endpoint panics in 1.42 validation middleware"
+  },
+  "cloudId": "00000000-0000-0000-0000-000000000000",
+  "arms": {
+    "skill": "bash acli command with markdown inlined via <(mdadf --compact <<'MD' ... MD)",
+    "mcp-adf": "createJiraIssue tool call with description as stringified ADF (default contentFormat)",
+    "mcp-md": "createJiraIssue tool call with description as markdown + contentFormat='markdown'"
+  }
+}
