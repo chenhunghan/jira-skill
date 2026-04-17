@@ -16,7 +16,8 @@ Saves **~80%** of Jira-related tokens on everyday tasks — more context room fo
 
 Top wins per operation:
 
-- Listing tickets: **94%** fewer tokens
+- Viewing an empty ticket: **99.7%** fewer tokens — MCP ships ~10 KB of metadata even for empty tickets
+- Listing tickets: **94%** fewer
 - Session startup: **74%** fewer
 - Rich-markdown creates: **74%** fewer
 
