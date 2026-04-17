@@ -1,6 +1,6 @@
 # jira-skill
 
-The only CLI first, markdown first, the most token efficient Jira skill. 
+CLI-first, markdown-first Jira skill — ~80% fewer tokens than Atlassian MCP on everyday tasks.
 
 An [Agent Skill](https://agentskills.io) for managing Jira work items with [Atlassian CLI (`acli`)](https://developer.atlassian.com/cloud/acli/) and [`mdadf`](https://github.com/chenhunghan/mdadf) for Markdown-to-ADF conversion.
 
