@@ -26,7 +26,9 @@ Read tasks captured against a real Jira, sanitized to committable fixtures:
 | task | skill | MCP |
 |---|---|---|
 | `small-issue` | `acli jira workitem view <KEY>` | `getJiraIssue` |
+| `barebones` | same, targeted at an empty-description issue | same |
 | `recent-assigned` | `acli jira workitem search --jql '...' --limit 5` | `searchJiraIssuesUsingJql`, `maxResults: 5` |
+| `recent-assigned-projected` | same, plus `--fields key,summary,status,issuetype` | same, plus `fields: ["summary","status","issuetype"]` |
 
 Write tasks synthesized (no Jira side effects) to measure the input payload each arm would emit:
 
@@ -70,11 +72,22 @@ bash benchmark/bench.sh sanitize small-issue
 bash benchmark/bench.sh verify
 bash benchmark/bench.sh measure small-issue
 
+# same flow for barebones (pick an issue with empty description):
+bash benchmark/bench.sh capture-skill barebones <EMPTY-ISSUE-KEY>
+bash benchmark/bench.sh sanitize barebones
+bash benchmark/bench.sh measure barebones
+
 # same flow for recent-assigned:
 bash benchmark/bench.sh capture-skill recent-assigned
 # (MCP capture: searchJiraIssuesUsingJql with maxResults: 5)
 bash benchmark/bench.sh sanitize recent-assigned
 bash benchmark/bench.sh measure recent-assigned
+
+# same for the projected variant (both arms request minimal fields):
+bash benchmark/bench.sh capture-skill recent-assigned-projected
+# (MCP capture: searchJiraIssuesUsingJql with fields=["summary","status","issuetype"])
+bash benchmark/bench.sh sanitize recent-assigned-projected
+bash benchmark/bench.sh measure recent-assigned-projected
 
 # write tasks (pure synthesis, no Jira side effects):
 bash benchmark/bench.sh synthesize-create create-short

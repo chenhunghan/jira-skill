@@ -28,17 +28,22 @@ die() { echo "error: $*" >&2; exit 2; }
 skill_command() {
   local task="$1"; shift
   case "$task" in
-    small-issue)
+    small-issue|barebones)
       local key="${1:-}"
-      [[ -n "$key" ]] || die "task 'small-issue' needs an issue KEY"
+      [[ -n "$key" ]] || die "task '$task' needs an issue KEY"
       printf 'acli jira workitem view %q' "$key"
       ;;
     recent-assigned)
       printf "acli jira workitem search --jql %q --limit 5" \
         "assignee = currentUser() ORDER BY updated DESC"
       ;;
+    recent-assigned-projected)
+      printf 'acli jira workitem search --jql %q --limit 5 --fields %q' \
+        "assignee = currentUser() ORDER BY updated DESC" \
+        "key,summary,status,issuetype"
+      ;;
     *)
-      die "unknown task: $task (small-issue|recent-assigned)"
+      die "unknown task: $task (small-issue|barebones|recent-assigned|recent-assigned-projected)"
       ;;
   esac
 }
@@ -132,8 +137,13 @@ commands:
                                 (SKILL.md + refs vs MCP tool schemas)
 
 tasks:
-  small-issue <KEY>             view a single issue (KEY required)
-  recent-assigned               list 5 most recent assigned to current user
+  small-issue <KEY>             view a medium issue (KEY required)
+  barebones <KEY>               view a truly minimal issue — shows MCP's
+                                fixed per-issue overhead at its worst
+  recent-assigned               list 5 most recent assigned, default fields
+  recent-assigned-projected     list 5 most recent assigned, fields
+                                projected to key,summary,status,issuetype
+                                (apples-to-apples: both arms minimal)
   create-short                  input-only: create issue with short markdown
   create-rich                   input-only: create issue with rich markdown
 EOF

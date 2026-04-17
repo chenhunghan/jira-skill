@@ -1,0 +1,26 @@
+┌───────┬──────────┬─────────────┬───────────────────────────┐
+│ Type  │ Key      │ Status      │ Summary                   │
+├───────┼──────────┼─────────────┼───────────────────────────┤
+│ Bug   │ BENCH-42 │ To Do       │ labore sit duis ex nisi u │
+│       │          │             │ tempor non amet sit labo  │
+│       │          │             │ ut id sit exercitation ni │
+│       │          │             │ in                        │
+├───────┼──────────┼─────────────┼───────────────────────────┤
+│ Story │ BENCH-41 │ To Do       │ ad non esse duis enim ess │
+│       │          │             │ ut tempor nulla dolored T │
+│       │          │             │ cillum                    │
+├───────┼──────────┼─────────────┼───────────────────────────┤
+│ Story │ BENCH-33 │ In Progress │ culpa et nulla eiusmod eu │
+│       │          │             │ nostrud sed consectetur i │
+│       │          │             │ eiusmod ut incididunt dui │
+│       │          │             │  e                        │
+├───────┼──────────┼─────────────┼───────────────────────────┤
+│ Bug   │ BENCH-35 │ Done        │ ad fugiat dolore ullamco  │
+│       │          │             │ minim ex ad qui nulla nis │
+│       │          │             │ voluptate elit ut amet si │
+│       │          │             │ consequat sed repre       │
+├───────┼──────────┼─────────────┼───────────────────────────┤
+│ Story │ BENCH-40 │ To Do       │ laboris anim excepteur a  │
+│       │          │             │ commodo magna ex commodo  │
+│       │          │             │ eu nisi esth              │
+└───────┴──────────┴─────────────┴───────────────────────────┘

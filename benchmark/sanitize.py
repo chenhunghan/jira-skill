@@ -210,6 +210,12 @@ class Sanitizer:
                 return rebuilt
             if key in USER_CONTAINER_KEYS or parent_key in USER_CONTAINER_KEYS:
                 return self._user_object(node)
+            # Duck-typed user object — catches user shapes embedded in
+            # customfields or other unexpected locations.
+            if isinstance(node.get("accountId"), str) and (
+                "displayName" in node or "emailAddress" in node
+            ):
+                return self._user_object(node)
             return {k: self.walk(v, k, key) for k, v in node.items()}
         if isinstance(node, list):
             return [self.walk(v, key, parent_key) for v in node]

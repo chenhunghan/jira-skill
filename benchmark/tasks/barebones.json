@@ -1,0 +1,17 @@
+{
+  "id": "barebones",
+  "description": "View a truly minimal Jira issue — short summary, empty description, no comments. Shows MCP's fixed per-issue metadata overhead (self URLs, 4-size avatar URLs, cloudId-laden links) when there is almost no content to dilute it.",
+  "prompt": "Show me issue {{issueKey}}.",
+  "fixtureIssueKey": "BENCH-2",
+  "skill": {
+    "command": "acli jira workitem view {{issueKey}}",
+    "note": "Default fields per jira/references/commands.md: key,issuetype,summary,status,assignee,description"
+  },
+  "mcp": {
+    "tool": "mcp__claude_ai_Atlassian__getJiraIssue",
+    "args": {
+      "issueIdOrKey": "{{issueKey}}"
+    },
+    "note": "No fields projection; default response is heavy even when the issue itself is empty."
+  }
+}

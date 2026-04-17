@@ -1,0 +1,19 @@
+{
+  "id": "recent-assigned-projected",
+  "description": "List the 5 most recently updated issues assigned to the current user with field projection on both arms — only the fields an agent actually needs to render a list view. Shows whether MCP closes the default-mode gap when the caller opts in.",
+  "prompt": "List my 5 most recent issues (key, summary, status, type only).",
+  "projectedFields": ["key", "summary", "status", "issuetype"],
+  "skill": {
+    "command": "acli jira workitem search --jql 'assignee = currentUser() ORDER BY updated DESC' --limit 5 --fields 'key,summary,status,issuetype'",
+    "note": "--fields drops the default assignee/priority columns; key is implicit."
+  },
+  "mcp": {
+    "tool": "mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql",
+    "args": {
+      "jql": "assignee = currentUser() ORDER BY updated DESC",
+      "maxResults": 5,
+      "fields": ["summary", "status", "issuetype"]
+    },
+    "note": "Per-issue self URLs and the statusCategory block are returned regardless of the fields list — that's the residual overhead worth measuring."
+  }
+}
