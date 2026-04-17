@@ -1,89 +1,40 @@
-# Token-efficiency benchmark: jira-skill vs Atlassian MCP
+# Why `jira-skill` saves you tokens (and money)
 
-Compares how many tokens each approach costs to satisfy the same read-heavy Jira task.
+Using `jira-skill` instead of the [Atlassian MCP server](https://support.atlassian.com/rovo/docs/getting-started-with-the-atlassian-remote-mcp-server/) cuts **~80% of Jira-related tokens** on a typical day — about **$0.95/day per user**, or **~$240/user/year** at [Claude Opus 4.7](https://www.anthropic.com/pricing#api) standard input pricing ($15 / MTok, April 2026). A team of 10 saves **~$2,400/year**. At the 1M-context tier, all dollar figures double.
 
-## Arms
+## Where the savings come from
 
-- **skill** — Claude + this repo's `jira` skill, driving `acli` through Bash. Output is table-like text.
-- **mcp** — Claude + Atlassian's MCP server, calling `getJiraIssue` / `searchJiraIssuesUsingJql` directly. Output is JSON with full ADF.
+| Everyday task | `jira-skill` | Atlassian MCP | You save |
+|---|---:|---:|---:|
+| Starting a session (Jira capability loaded in context) | 1,932 tok | 7,421 tok | **74%** |
+| Viewing one ticket | 1,022 tok | 1,865 tok | **45%** |
+| Listing your 5 most recent tickets | 618 tok | 10,032 tok | **94%** |
+| Creating a ticket with a rich markdown body | 269 tok | 1,016 tok | **74%** |
 
-## What's measured
+Numbers are per operation, from real sanitized fixtures in this repo. See [METHODOLOGY.md](./METHODOLOGY.md) for how they're captured and measured.
 
-Per task, for each arm: tool-result bytes, character count, approximate Claude tokens (chars ÷ 4). Approximate because no `ANTHROPIC_API_KEY` is wired for exact `count_tokens` calls yet — consistent approximation across arms keeps the **ratio** meaningful.
+## A day in the life
 
-Fixed overhead (SKILL.md + references tokens vs MCP tool-schema tokens) is **not** measured in v1; tracked as follow-up.
+A realistic workday: 1 session + 10 ticket views + 5 JQL searches + 3 issue creates with a rich markdown description.
 
-## Data-handling rules
+| | Tokens (one day) | Cost @ $15/MTok |
+|---|---:|---:|
+| `jira-skill` | ~16,000 | **$0.24** |
+| Atlassian MCP (default) | ~79,000 | **$1.19** |
+| **Difference** | **63,000 fewer tokens (~80%)** | **$0.95/day saved** |
 
-Captured payloads contain real company data — issue keys, project names, account IDs, display names. They must never land in git.
+Projected: **$4.75/week, ~$240/year** per user. A team of 10: **~$2,400/year**. And that's just the dollar line — tokens saved also keep more of your context window free for actual reasoning.
 
-- `capture/` — raw captures, **gitignored**.
-- `fixtures/` — sanitized, size-preserving, committed.
-- `blocklist.txt` — **gitignored**; substrings that must not appear in fixtures; checked by `verify.sh`. Copy `blocklist.example.txt` → `blocklist.txt` and fill in your company/PII terms before running sanitize/verify.
+## Why the gap is this wide
 
-`sanitize.py` is deterministic and size-preserving: free-text fields (summary, ADF text nodes, comment bodies) are replaced with lorem ipsum of the same character length, so byte and approximate-token counts stay honest. Structural fields (URLs, UUIDs, account IDs, issue keys, emails, display names) are swapped with stable placeholders.
+- **Reads.** Every MCP response embeds ~7 KB of metadata per issue — self-URLs, 4-size avatar URLs, cloudId-laden links — regardless of how small the issue is. That overhead compounds linearly: 1 issue is bad, 10 issues is dire. `acli` returns a flat table that stays ~4 KB whether you pull 1 row or 100.
+- **Writes.** MCP defaults to Atlassian Document Format (ADF) for descriptions, so the agent has to emit verbose structural JSON for every heading, table, code block, and link. `jira-skill` pipes markdown through `mdadf --compact` in a subprocess, so the agent only ever emits raw markdown — regardless of how rich the body is.
+- **Startup.** Enabling Atlassian's MCP loads **31 tool schemas** (Jira + Confluence) into context before you do anything. `jira-skill` is one `SKILL.md` file; reference pages load only when the agent needs them.
 
-## Workflow
+## Caveats, briefly
 
-```bash
-# 1. capture the skill arm (runs acli against real Jira)
-bash benchmark/bench.sh capture-skill BENCH-1
+- Token counts are approximations (character count ÷ 4); ratios are stable.
+- MCP can reach near-parity on create if the agent remembers to set `contentFormat: "markdown"` on every call — the skill gets you there by default.
+- Agent reasoning and final-answer output tokens aren't measured; the real gap is likely a bit bigger.
 
-# 2. capture the MCP arm — done from a Claude agent session that has
-#    the Atlassian MCP server configured. Save the raw tool result to
-#    benchmark/capture/mcp-<KEY>.json. See docs/mcp-capture.md.
-
-# 3. sanitize raw → fixtures
-bash benchmark/bench.sh sanitize BENCH-1
-
-# 4. verify no forbidden substrings leaked
-bash benchmark/bench.sh verify
-
-# 5. measure fixtures; writes metrics.json and prints summary
-bash benchmark/bench.sh measure BENCH-1
-
-# or do everything (2 must be done manually first):
-bash benchmark/bench.sh all BENCH-1
-```
-
-## Layout
-
-```
-benchmark/
-├── README.md                # this file
-├── bench.sh                 # orchestrator
-├── sanitize.py              # raw → fixture
-├── measure.py               # fixture → metrics
-├── verify.sh                # grep blocklist against fixtures
-├── blocklist.txt            # forbidden substrings (one per line)
-├── tasks/
-│   └── view-small-issue.json
-├── capture/                 # gitignored — real data
-└── fixtures/                # committed — sanitized
-```
-
-## Known limitations (v1)
-
-- Token counts are approximate. Wire `ANTHROPIC_API_KEY` + `count_tokens` for exactness.
-- Fixed overhead (skill context vs MCP tool schemas) not yet measured.
-- Only the payload arriving from the tool is measured — full agent-loop token cost (reasoning, multi-turn, final answer) would require running both arms through an LLM harness like `run-evals.sh`. Planned for v2.
-
-## Tasks
-
-Read (captured from real Jira, sanitized):
-- `small-issue` — view one issue via `acli jira workitem view <KEY>` vs MCP `getJiraIssue`.
-- `recent-assigned` — list 5 issues via `acli jira workitem search --jql ... --limit 5` vs MCP `searchJiraIssuesUsingJql` with `maxResults: 5`.
-
-Write (input-only synthesis — no Jira side effects):
-- `create-short` — create issue with short markdown body (heading + 2 bullets).
-- `create-rich` — create issue with rich markdown body (headings, code block, table, link, bullets).
-
-Create tasks produce **3 arms** per variant:
-- `skill` — bash `acli jira workitem create ... --description-file <(mdadf --compact <<MD ... MD)`. Agent types markdown; mdadf converts subprocess-side.
-- `mcp-adf` — MCP `createJiraIssue` default (contentFormat defaults to ADF). Agent must emit stringified ADF as `description`.
-- `mcp-md` — MCP `createJiraIssue` with `contentFormat: "markdown"` opt-in. Agent emits markdown.
-
-Read tasks use natural defaults (no `--fields` projection). A projected variant can be added later.
-
-Fixed overhead (no per-task capture — measures the session-startup context cost):
-- `measure-overhead` — compares `jira/SKILL.md` (+ optional references) against the full Atlassian MCP tool-schema dump. Also reports a Jira-focused MCP subset for an apples-to-apples baseline. Skill uses progressive disclosure for references, so its typical overhead sits between initial (SKILL.md only) and max (SKILL.md + all refs).
+Full method and reproduction steps: [METHODOLOGY.md](./METHODOLOGY.md).
