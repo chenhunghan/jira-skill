@@ -294,10 +294,91 @@ def _sanitize_acli_view(raw: str, s: Sanitizer) -> str:
     return "\n".join(out) + trailing
 
 
+TABLE_LOREM_COLUMNS = {"summary", "description"}
+
+
+def _sanitize_acli_table(raw: str, s: Sanitizer) -> str | None:
+    """Handle acli table output with box-drawing separators.
+
+    Columns whose header matches `summary` or `description` have their
+    cell contents lorem-replaced (preserving padding). Other cells go
+    through string-level scrubbing so URLs, keys, emails, and blocklist
+    terms are cleaned.
+    """
+    sep = "│" if "│" in raw else ("|" if "|" in raw else None)
+    if sep is None:
+        return None
+
+    lines = raw.splitlines()
+    header_line = None
+    for line in lines:
+        if line.startswith(sep):
+            cells = line.split(sep)
+            if any(
+                cell.strip() and any(c.isalpha() for c in cell) for cell in cells[1:-1]
+            ):
+                header_line = line
+                break
+    if header_line is None:
+        return None
+
+    sep_positions = [i for i, c in enumerate(header_line) if c == sep]
+    if len(sep_positions) < 2:
+        return None
+
+    cells: list[tuple[int, int, str]] = []
+    for i in range(len(sep_positions) - 1):
+        start = sep_positions[i] + 1
+        end = sep_positions[i + 1]
+        name = header_line[start:end].strip()
+        cells.append((start, end, name))
+
+    lorem_cols = [
+        i for i, (_, _, name) in enumerate(cells)
+        if name.lower() in TABLE_LOREM_COLUMNS
+    ]
+
+    out_lines: list[str] = []
+    last_end = cells[-1][1]
+    for line in lines:
+        if (
+            line.startswith(sep)
+            and len(line) >= last_end
+            and line is not header_line
+            and any(c.isalnum() for c in line)
+            and lorem_cols
+        ):
+            chars = list(line)
+            for col_idx in lorem_cols:
+                start, end, _ = cells[col_idx]
+                cell = line[start:end]
+                stripped = cell.strip()
+                if not stripped:
+                    continue
+                lead = len(cell) - len(cell.lstrip())
+                trail = len(cell) - len(cell.rstrip())
+                content_len = end - start - lead - trail
+                if content_len <= 0:
+                    continue
+                replacement = s.lorem(content_len)
+                for j, ch in enumerate(replacement):
+                    chars[start + lead + j] = ch
+            out_lines.append(s.scrub_string("".join(chars)))
+        else:
+            out_lines.append(s.scrub_string(line))
+
+    trailing = "\n" if raw.endswith("\n") else ""
+    return "\n".join(out_lines) + trailing
+
+
 def sanitize_text(raw: str, s: Sanitizer) -> str:
     raw = ANSI_RE.sub("", raw)
     if re.match(r"^Key:\s", raw):
         return _sanitize_acli_view(raw, s)
+    if raw.lstrip().startswith(("┌", "╭", "│", "+")):
+        result = _sanitize_acli_table(raw, s)
+        if result is not None:
+            return result
     return s.scrub_string(raw)
 
 

@@ -1,0 +1,21 @@
+{
+  "id": "recent-assigned",
+  "description": "List the 5 most recently updated issues assigned to the current user. Both arms use default output format and default field projection.",
+  "prompt": "List the 5 most recent issues assigned to me.",
+  "skill": {
+    "command": "acli jira workitem search --jql 'assignee = currentUser() ORDER BY updated DESC' --limit 5",
+    "note": "Default fields per commands.md: issuetype,key,assignee,priority,status,summary (table output)"
+  },
+  "mcp": {
+    "tool": "mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql",
+    "args": {
+      "jql": "assignee = currentUser() ORDER BY updated DESC",
+      "maxResults": 5
+    },
+    "note": "No fields projection; response includes full per-issue metadata (self URLs, avatar URLs, full description) for every hit."
+  },
+  "expected": {
+    "mustContainKeys": 5,
+    "mustMentionFields": ["summary", "status"]
+  }
+}

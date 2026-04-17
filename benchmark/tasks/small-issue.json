@@ -1,5 +1,5 @@
 {
-  "id": "view-small-issue",
+  "id": "small-issue",
   "description": "View a single small Jira issue using the natural defaults of each arm (no --fields projection).",
   "prompt": "Show me issue {{issueKey}}.",
   "fixtureIssueKey": "BENCH-1",

@@ -67,4 +67,10 @@ benchmark/
 - Token counts are approximate. Wire `ANTHROPIC_API_KEY` + `count_tokens` for exactness.
 - Fixed overhead (skill context vs MCP tool schemas) not yet measured.
 - Only the payload arriving from the tool is measured — full agent-loop token cost (reasoning, multi-turn, final answer) would require running both arms through an LLM harness like `run-evals.sh`. Planned for v2.
-- Single task so far: "view a small issue". More read-heavy tasks to follow.
+
+## Tasks
+
+- `small-issue` — view one issue via `acli jira workitem view <KEY>` vs MCP `getJiraIssue`.
+- `recent-assigned` — list 5 issues via `acli jira workitem search --jql ... --limit 5` vs MCP `searchJiraIssuesUsingJql` with `maxResults: 5`.
+
+Both arms use natural defaults (no `--fields` projection). A projected variant can be added later to isolate what projection buys you.

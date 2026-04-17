@@ -6,7 +6,7 @@ meaningful. Exact counts require wiring `anthropic.count_tokens` (needs
 ANTHROPIC_API_KEY) — left as a follow-up.
 
 Usage:
-  python3 measure.py <skill-fixture> <mcp-fixture> [--json]
+  python3 measure.py <skill-fixture> <mcp-fixture> [--task NAME] [--json]
 """
 
 from __future__ import annotations
@@ -36,6 +36,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("skill")
     ap.add_argument("mcp")
+    ap.add_argument("--task", default=None, help="label for the report header")
     ap.add_argument("--json", action="store_true", help="print JSON only")
     args = ap.parse_args()
 
@@ -55,7 +56,8 @@ def main() -> int:
         print(json.dumps(result, indent=2))
         return 0
 
-    print("=== token-efficiency benchmark: view-small-issue ===")
+    label = args.task or "(unnamed task)"
+    print(f"=== token-efficiency benchmark: {label} ===")
     print(f"{'arm':<8} {'bytes':>8} {'chars':>8} {'~tokens':>8}")
     print(f"{'skill':<8} {skill['bytes']:>8} {skill['chars']:>8} {skill['tokens_approx']:>8}")
     print(f"{'mcp':<8} {mcp['bytes']:>8} {mcp['chars']:>8} {mcp['tokens_approx']:>8}")

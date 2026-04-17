@@ -1,34 +1,61 @@
 #!/usr/bin/env bash
 # bench.sh - orchestrator for the token-efficiency benchmark
 #
+# Task-parameterized. Each task id matches tasks/<id>.json, and
+# all capture/fixture filenames use the same slug.
+#
 # Commands:
-#   capture-skill <KEY>   run acli, save to capture/skill-<KEY>.txt (gitignored)
-#   sanitize <KEY>        capture/ → fixtures/ (committable)
-#   verify                grep fixtures/ against blocklist.txt
-#   measure               compute bytes + approx tokens for current fixtures
-#   all <KEY>             capture-skill → sanitize → verify → measure
-#                         (MCP capture is a manual prerequisite — see README)
+#   capture-skill <TASK> [extra-args]  run the skill arm, save to capture/
+#   sanitize <TASK>                    capture/<TASK>.* → fixtures/<TASK>.*
+#   verify                             grep fixtures/ against blocklist.txt
+#   measure <TASK>                     print bytes + approx tokens
+#
+# Tasks:
+#   small-issue <KEY>     view a single issue (KEY required)
+#   recent-assigned       list 5 most recent issues assigned to current user
 
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 die() { echo "error: $*" >&2; exit 2; }
 
+# Dispatch: print the skill-arm command line for a task. Any additional
+# positional args are task-specific (e.g. an issue key for small-issue).
+skill_command() {
+  local task="$1"; shift
+  case "$task" in
+    small-issue)
+      local key="${1:-}"
+      [[ -n "$key" ]] || die "task 'small-issue' needs an issue KEY"
+      printf 'acli jira workitem view %q' "$key"
+      ;;
+    recent-assigned)
+      printf "acli jira workitem search --jql %q --limit 5" \
+        "assignee = currentUser() ORDER BY updated DESC"
+      ;;
+    *)
+      die "unknown task: $task (small-issue|recent-assigned)"
+      ;;
+  esac
+}
+
 cmd="${1:-}"; shift || true
 
 case "$cmd" in
   capture-skill)
-    KEY="${1:-}"; [[ -n "$KEY" ]] || die "usage: bench.sh capture-skill <KEY>"
+    task="${1:-}"; [[ -n "$task" ]] || die "usage: bench.sh capture-skill <TASK> [extra-args]"
+    shift
     command -v acli >/dev/null || die "acli not installed"
     mkdir -p "$HERE/capture"
-    out="$HERE/capture/skill-$KEY.txt"
-    echo "→ acli jira workitem view $KEY"
-    acli jira workitem view "$KEY" > "$out" 2>&1
+    out="$HERE/capture/skill-$task.txt"
+    skill_cmd="$(skill_command "$task" "$@")"
+    echo "→ $skill_cmd"
+    eval "$skill_cmd" > "$out" 2>&1
     echo "wrote $out ($(wc -c < "$out" | tr -d ' ') bytes)"
     ;;
 
   sanitize)
-    KEY="${1:-}"; [[ -n "$KEY" ]] || die "usage: bench.sh sanitize <KEY>"
+    task="${1:-}"; [[ -n "$task" ]] || die "usage: bench.sh sanitize <TASK>"
     command -v python3 >/dev/null || die "python3 required"
     mkdir -p "$HERE/fixtures"
     bl="$HERE/blocklist.txt"
@@ -37,15 +64,15 @@ case "$cmd" in
       die "missing $bl — copy blocklist.example.txt → blocklist.txt and add your sensitive terms before sanitizing"
     fi
 
-    skill_in="$HERE/capture/skill-$KEY.txt"
-    mcp_in="$HERE/capture/mcp-$KEY.json"
-    [[ -f "$skill_in" ]] || die "missing $skill_in (run: bench.sh capture-skill $KEY)"
-    [[ -f "$mcp_in" ]] || die "missing $mcp_in (see README for manual MCP capture)"
+    skill_in="$HERE/capture/skill-$task.txt"
+    mcp_in="$HERE/capture/mcp-$task.json"
+    [[ -f "$skill_in" ]] || die "missing $skill_in (run: bench.sh capture-skill $task)"
+    [[ -f "$mcp_in" ]] || die "missing $mcp_in (MCP capture must be done from an agent session; see README)"
 
     python3 "$HERE/sanitize.py" --blocklist "$bl" \
-      "$skill_in" "$HERE/fixtures/skill-small-issue.txt"
+      "$skill_in" "$HERE/fixtures/skill-$task.txt"
     python3 "$HERE/sanitize.py" --blocklist "$bl" \
-      "$mcp_in" "$HERE/fixtures/mcp-small-issue.json"
+      "$mcp_in" "$HERE/fixtures/mcp-$task.json"
     ;;
 
   verify)
@@ -53,19 +80,12 @@ case "$cmd" in
     ;;
 
   measure)
+    task="${1:-}"; [[ -n "$task" ]] || die "usage: bench.sh measure <TASK>"
     command -v python3 >/dev/null || die "python3 required"
-    skill="$HERE/fixtures/skill-small-issue.txt"
-    mcp="$HERE/fixtures/mcp-small-issue.json"
-    [[ -f "$skill" && -f "$mcp" ]] || die "fixtures missing; run: bench.sh sanitize <KEY>"
-    python3 "$HERE/measure.py" "$skill" "$mcp"
-    ;;
-
-  all)
-    KEY="${1:-}"; [[ -n "$KEY" ]] || die "usage: bench.sh all <KEY>"
-    "$0" capture-skill "$KEY"
-    "$0" sanitize "$KEY"
-    "$0" verify
-    "$0" measure
+    skill="$HERE/fixtures/skill-$task.txt"
+    mcp="$HERE/fixtures/mcp-$task.json"
+    [[ -f "$skill" && -f "$mcp" ]] || die "fixtures missing; run: bench.sh sanitize $task"
+    python3 "$HERE/measure.py" --task "$task" "$skill" "$mcp"
     ;;
 
   *)
@@ -73,12 +93,14 @@ case "$cmd" in
 usage: bench.sh <command>
 
 commands:
-  capture-skill <KEY>   run acli, save to capture/ (gitignored)
-  sanitize <KEY>        capture/ → fixtures/ (committable)
-  verify                check fixtures/ against blocklist.txt
-  measure               compute bytes + approx tokens for fixtures/
-  all <KEY>             run the full pipeline
-                        (requires capture/mcp-<KEY>.json to exist already)
+  capture-skill <TASK> [args]   run the skill arm; save to capture/ (gitignored)
+  sanitize <TASK>               capture/ → fixtures/ (committable)
+  verify                        grep fixtures/ against blocklist.txt
+  measure <TASK>                compute bytes + approx tokens for fixtures/
+
+tasks:
+  small-issue <KEY>             view a single issue (KEY required)
+  recent-assigned               list 5 most recent assigned to current user
 EOF
     exit 2
     ;;
